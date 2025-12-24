@@ -51,6 +51,7 @@ interface NavItem {
           <a 
             [routerLink]="item.route" 
             routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
             class="nav-item nav-item--admin"
           >
             <span class="material-icons-outlined nav-item__icon">{{ item.icon }}</span>
@@ -70,29 +71,6 @@ interface NavItem {
           <div class="progress__bar" style="width: 0%"></div>
         </div>
         <p class="progress-detail">0/12 topics hoàn thành</p>
-      </div>
-      
-      <!-- User Info / Auth -->
-      <div class="sidebar__user">
-        @if (authService.isLoggedIn()) {
-        <div class="user-info">
-          <div class="user-avatar">
-            <span class="material-icons-outlined">person</span>
-          </div>
-          <div class="user-details">
-            <span class="user-name">{{ authService.currentUser()?.username }}</span>
-            <span class="user-role">{{ authService.currentUser()?.role }}</span>
-          </div>
-          <button class="btn-logout" (click)="logout()" title="Đăng xuất">
-            <span class="material-icons-outlined">logout</span>
-          </button>
-        </div>
-        } @else {
-        <a routerLink="/login" class="btn btn--primary btn--full">
-          <span class="material-icons-outlined">login</span>
-          Đăng nhập
-        </a>
-        }
       </div>
     </aside>
   `,

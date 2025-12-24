@@ -1,0 +1,3 @@
+topic_id,content,code_snippet,question_type,difficulty,explanation,option_a,option_b,option_c,option_d,correct_answer
+4,"Stream nào là intermediate operation?","","SINGLE_CHOICE",2,"filter là intermediate, collect là terminal","filter()","collect()","forEach()","count()","A"
+5,"Functional interface có bao nhiêu abstract method?","","SINGLE_CHOICE",1,"Functional interface chỉ có duy nhất 1 abstract method","1","2","0","Nhiều","A"

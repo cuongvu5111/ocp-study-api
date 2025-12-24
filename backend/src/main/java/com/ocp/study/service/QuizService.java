@@ -7,7 +7,7 @@ import com.ocp.study.entity.QuestionOption;
 import com.ocp.study.entity.QuizHistory;
 import com.ocp.study.repository.QuestionRepository;
 import com.ocp.study.repository.QuizHistoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,13 +21,12 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @Service
+@RequiredArgsConstructor
 public class QuizService {
 
-    @Autowired
-    private QuestionRepository questionRepository;
-
-    @Autowired
-    private QuizHistoryRepository quizHistoryRepository;
+    private final QuestionRepository questionRepository;
+    private final QuizHistoryRepository quizHistoryRepository;
+    private final UserService userService;
 
     /**
      * Lấy câu hỏi ngẫu nhiên cho quiz
@@ -93,6 +92,7 @@ public class QuizService {
      */
     public QuizHistory saveQuizResult(QuizSubmissionDTO submission) {
         QuizHistory history = QuizHistory.builder()
+                .user(userService.getCurrentUser())
                 .quizType(submission.getQuizType())
                 .topicId(submission.getTopicId())
                 .topicName(submission.getTopicName())
@@ -106,9 +106,9 @@ public class QuizService {
     }
 
     /**
-     * Lấy 10 lịch sử gần nhất
+     * Lấy 10 lịch sử gần nhất của user
      */
     public List<QuizHistory> getQuizHistory() {
-        return quizHistoryRepository.findTop10ByOrderByCompletedAtDesc();
+        return quizHistoryRepository.findTop10ByUserOrderByCompletedAtDesc(userService.getCurrentUser());
     }
 }

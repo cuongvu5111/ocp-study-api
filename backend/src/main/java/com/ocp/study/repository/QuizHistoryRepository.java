@@ -1,6 +1,7 @@
 package com.ocp.study.repository;
 
 import com.ocp.study.entity.QuizHistory;
+import com.ocp.study.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,12 +17,12 @@ import java.util.List;
 public interface QuizHistoryRepository extends JpaRepository<QuizHistory, Long> {
 
     /**
-     * Lấy lịch sử quiz, sắp xếp mới nhất trước
+     * Lấy lịch sử quiz của user, sắp xếp mới nhất trước
      */
-    List<QuizHistory> findAllByOrderByCompletedAtDesc();
+    List<QuizHistory> findByUserOrderByCompletedAtDesc(User user);
 
     /**
-     * Lấy N lịch sử gần nhất
+     * Lấy N lịch sử gần nhất của user
      */
-    List<QuizHistory> findTop10ByOrderByCompletedAtDesc();
+    List<QuizHistory> findTop10ByUserOrderByCompletedAtDesc(User user);
 }

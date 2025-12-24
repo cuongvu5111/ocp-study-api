@@ -8,10 +8,10 @@ import { ApiService } from '../../../core/services/api.service';
  * Admin component - Import câu hỏi từ CSV.
  */
 @Component({
-    selector: 'app-question-import',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
-    template: `
+  selector: 'app-question-import',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  template: `
     <div class="admin-container">
       <header class="page-header">
         <a routerLink="/dashboard" class="btn btn--ghost btn--icon">
@@ -79,7 +79,7 @@ import { ApiService } from '../../../core/services/api.service';
               </tr>
             </thead>
             <tbody>
-              @for (row of previewData().slice(0, 5); track $index; let i = $index) {
+              @for (row of previewData().slice(0, 5); track i; let i = $index) {
               <tr>
                 <td>{{ i + 1 }}</td>
                 <td>{{ row.topicId }}</td>
@@ -126,7 +126,7 @@ import { ApiService } from '../../../core/services/api.service';
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .admin-container {
       max-width: 900px;
       margin: 0 auto;
@@ -261,137 +261,134 @@ import { ApiService } from '../../../core/services/api.service';
   `]
 })
 export class QuestionImportComponent {
-    private apiService = inject(ApiService);
+  private apiService = inject(ApiService);
 
-    selectedFile = signal<File | null>(null);
-    previewData = signal<any[]>([]);
-    isDragover = signal(false);
-    loading = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
+  selectedFile = signal<File | null>(null);
+  previewData = signal<any[]>([]);
+  isDragover = signal(false);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
 
-    downloadTemplate() {
-        const csvContent = `topic_id,content,code_snippet,question_type,difficulty,explanation,option_a,option_b,option_c,option_d,correct_answer
-4,"Stream nào là intermediate operation?","","SINGLE_CHOICE",2,"filter là intermediate, collect là terminal","filter()","collect()","forEach()","count()","A"
-5,"Functional interface có bao nhiêu abstract method?","","SINGLE_CHOICE",1,"Functional interface chỉ có duy nhất 1 abstract method","1","2","0","Nhiều","A"`;
+  downloadTemplate() {
+    // Download từ backend thay vì generate client-side
+    const url = `${this.apiService['baseUrl']}/admin/questions/template`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'questions_template.csv';
+    link.click();
+  }
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'questions_template.csv';
-        link.click();
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDragover.set(true);
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isDragover.set(false);
+    const files = event.dataTransfer?.files;
+    if (files?.length) {
+      this.handleFile(files[0]);
+    }
+  }
+
+  onFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.handleFile(input.files[0]);
+    }
+  }
+
+  handleFile(file: File) {
+    if (!file.name.endsWith('.csv')) {
+      this.error.set('Vui lòng chọn file CSV');
+      return;
     }
 
-    onDragOver(event: DragEvent) {
-        event.preventDefault();
-        this.isDragover.set(true);
-    }
+    this.selectedFile.set(file);
+    this.error.set(null);
+    this.success.set(null);
 
-    onDrop(event: DragEvent) {
-        event.preventDefault();
-        this.isDragover.set(false);
-        const files = event.dataTransfer?.files;
-        if (files?.length) {
-            this.handleFile(files[0]);
-        }
-    }
+    // Parse preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      this.parseCSV(text);
+    };
+    reader.readAsText(file);
+  }
 
-    onFileSelect(event: Event) {
-        const input = event.target as HTMLInputElement;
-        if (input.files?.length) {
-            this.handleFile(input.files[0]);
-        }
-    }
+  parseCSV(text: string) {
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(',');
 
-    handleFile(file: File) {
-        if (!file.name.endsWith('.csv')) {
-            this.error.set('Vui lòng chọn file CSV');
-            return;
-        }
+    const data = lines.slice(1).map(line => {
+      const values = this.parseCSVLine(line);
+      return {
+        topicId: values[0],
+        content: values[1],
+        codeSnippet: values[2],
+        questionType: values[3],
+        difficulty: values[4],
+        explanation: values[5],
+        optionA: values[6],
+        optionB: values[7],
+        optionC: values[8],
+        optionD: values[9],
+        correctAnswer: values[10]
+      };
+    });
 
-        this.selectedFile.set(file);
-        this.error.set(null);
-        this.success.set(null);
+    this.previewData.set(data);
+  }
 
-        // Parse preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target?.result as string;
-            this.parseCSV(text);
-        };
-        reader.readAsText(file);
-    }
+  parseCSVLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
 
-    parseCSV(text: string) {
-        const lines = text.split('\n').filter(l => l.trim());
-        const headers = lines[0].split(',');
-
-        const data = lines.slice(1).map(line => {
-            const values = this.parseCSVLine(line);
-            return {
-                topicId: values[0],
-                content: values[1],
-                codeSnippet: values[2],
-                questionType: values[3],
-                difficulty: values[4],
-                explanation: values[5],
-                optionA: values[6],
-                optionB: values[7],
-                optionC: values[8],
-                optionD: values[9],
-                correctAnswer: values[10]
-            };
-        });
-
-        this.previewData.set(data);
-    }
-
-    parseCSVLine(line: string): string[] {
-        const result: string[] = [];
-        let current = '';
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '"') {
-                inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-                result.push(current.trim());
-                current = '';
-            } else {
-                current += char;
-            }
-        }
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
         result.push(current.trim());
-        return result;
+        current = '';
+      } else {
+        current += char;
+      }
     }
+    result.push(current.trim());
+    return result;
+  }
 
-    clearFile() {
-        this.selectedFile.set(null);
-        this.previewData.set([]);
-        this.error.set(null);
-        this.success.set(null);
-    }
+  clearFile() {
+    this.selectedFile.set(null);
+    this.previewData.set([]);
+    this.error.set(null);
+    this.success.set(null);
+  }
 
-    importFile() {
-        if (!this.selectedFile()) return;
+  importFile() {
+    if (!this.selectedFile()) return;
 
-        this.loading.set(true);
-        this.error.set(null);
+    this.loading.set(true);
+    this.error.set(null);
 
-        const formData = new FormData();
-        formData.append('file', this.selectedFile()!);
+    const formData = new FormData();
+    formData.append('file', this.selectedFile()!);
 
-        this.apiService.importQuestionsCSV(formData).subscribe({
-            next: (response) => {
-                this.loading.set(false);
-                this.success.set(`Import thành công ${response.imported || this.previewData().length} câu hỏi!`);
-                this.clearFile();
-            },
-            error: (err) => {
-                this.loading.set(false);
-                this.error.set(err.error?.message || 'Lỗi khi import file');
-            }
-        });
-    }
+    this.apiService.importQuestionsCSV(formData).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+        this.success.set(`Import thành công ${response.imported || this.previewData().length} câu hỏi!`);
+        this.clearFile();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Lỗi khi import file');
+      }
+    });
+  }
 }

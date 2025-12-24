@@ -2,9 +2,12 @@ package com.ocp.study.service;
 
 import com.ocp.study.dto.FlashcardDTO;
 import com.ocp.study.entity.Flashcard;
+import com.ocp.study.entity.FlashcardReview;
 import com.ocp.study.entity.Subtopic;
 import com.ocp.study.entity.Topic;
+import com.ocp.study.entity.User;
 import com.ocp.study.repository.FlashcardRepository;
+import com.ocp.study.repository.FlashcardReviewRepository;
 import com.ocp.study.repository.SubtopicRepository;
 import com.ocp.study.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Service xử lý logic cho Flashcards.
+ * Service xử lý logic cho Flashcards với user-specific review tracking.
  * 
  * @author OCP Study Team
  * @since 1.0.0
@@ -27,33 +31,48 @@ import java.util.stream.Collectors;
 public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
+    private final FlashcardReviewRepository flashcardReviewRepository;
     private final TopicRepository topicRepository;
     private final SubtopicRepository subtopicRepository;
+    private final UserService userService;
 
     /**
-     * Lấy tất cả flashcards
+     * Lấy tất cả flashcards (chưa filter theo user)
      */
     public List<FlashcardDTO> getAllFlashcards() {
         return flashcardRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(fc -> mapToDTO(fc, null))
                 .collect(Collectors.toList());
     }
 
     /**
-     * Lấy flashcards theo topic
+     * Lấy flashcards theo topic với user review data
      */
     public List<FlashcardDTO> getFlashcardsByTopic(Long topicId) {
-        return flashcardRepository.findByTopicIdOrderByCreatedAtDesc(topicId).stream()
-                .map(this::mapToDTO)
+        User user = userService.getCurrentUser();
+        List<Flashcard> flashcards = flashcardRepository.findByTopicIdOrderByCreatedAtDesc(topicId);
+
+        // Get all reviews for this user
+        Map<Long, FlashcardReview> reviewMap = flashcardReviewRepository.findByUserAndTopicId(user, topicId)
+                .stream()
+                .collect(Collectors.toMap(
+                        fr -> fr.getFlashcard().getId(),
+                        fr -> fr));
+
+        return flashcards.stream()
+                .map(fc -> mapToDTO(fc, reviewMap.get(fc.getId())))
                 .collect(Collectors.toList());
     }
 
     /**
-     * Lấy flashcards cần review (spaced repetition)
+     * Lấy flashcards cần review của user (spaced repetition)
      */
     public List<FlashcardDTO> getFlashcardsToReview() {
-        return flashcardRepository.findCardsToReview(LocalDateTime.now()).stream()
-                .map(this::mapToDTO)
+        User user = userService.getCurrentUser();
+        List<FlashcardReview> dueReviews = flashcardReviewRepository.findDueReviewsByUser(user, LocalDateTime.now());
+
+        return dueReviews.stream()
+                .map(review -> mapToDTO(review.getFlashcard(), review))
                 .collect(Collectors.toList());
     }
 
@@ -61,8 +80,13 @@ public class FlashcardService {
      * Lấy flashcards cần review theo topic
      */
     public List<FlashcardDTO> getFlashcardsToReviewByTopic(Long topicId) {
-        return flashcardRepository.findCardsToReviewByTopic(topicId, LocalDateTime.now()).stream()
-                .map(this::mapToDTO)
+        User user = userService.getCurrentUser();
+        List<FlashcardReview> reviews = flashcardReviewRepository.findByUserAndTopicId(user, topicId);
+
+        LocalDateTime now = LocalDateTime.now();
+        return reviews.stream()
+                .filter(review -> review.getNextReview() != null && review.getNextReview().isBefore(now))
+                .map(review -> mapToDTO(review.getFlashcard(), review))
                 .collect(Collectors.toList());
     }
 
@@ -72,7 +96,7 @@ public class FlashcardService {
     public FlashcardDTO getFlashcardById(Long id) {
         Flashcard flashcard = flashcardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Flashcard không tồn tại: " + id));
-        return mapToDTO(flashcard);
+        return mapToDTO(flashcard, null); // Admin operation, no user review
     }
 
     /**
@@ -98,7 +122,7 @@ public class FlashcardService {
                 .build();
 
         flashcard = flashcardRepository.save(flashcard);
-        return mapToDTO(flashcard);
+        return mapToDTO(flashcard, null); // Admin create, no user review
     }
 
     /**
@@ -120,7 +144,7 @@ public class FlashcardService {
         }
 
         flashcard = flashcardRepository.save(flashcard);
-        return mapToDTO(flashcard);
+        return mapToDTO(flashcard, null); // Admin update, no user review
     }
 
     /**
@@ -135,22 +159,31 @@ public class FlashcardService {
     }
 
     /**
-     * Đánh dấu đã review flashcard
+     * Đánh dấu đã review flashcard (user-specific)
      */
     @Transactional
-    public FlashcardDTO markReviewed(Long id, boolean correct) {
-        Flashcard flashcard = flashcardRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Flashcard không tồn tại: " + id));
+    public FlashcardDTO markReviewed(Long flashcardId, boolean correct) {
+        User user = userService.getCurrentUser();
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> new RuntimeException("Flashcard không tồn tại: " + flashcardId));
 
-        flashcard.markReviewed(correct);
-        flashcard = flashcardRepository.save(flashcard);
-        return mapToDTO(flashcard);
+        // Find or create review record
+        FlashcardReview review = flashcardReviewRepository.findByUserAndFlashcard(user, flashcard)
+                .orElseGet(() -> FlashcardReview.builder()
+                        .user(user)
+                        .flashcard(flashcard)
+                        .build());
+
+        review.markReviewed(correct);
+        review = flashcardReviewRepository.save(review);
+
+        return mapToDTO(flashcard, review);
     }
 
     /**
-     * Map entity sang DTO
+     * Map entity sang DTO, merge với review data nếu có
      */
-    private FlashcardDTO mapToDTO(Flashcard flashcard) {
+    private FlashcardDTO mapToDTO(Flashcard flashcard, FlashcardReview review) {
         return FlashcardDTO.builder()
                 .id(flashcard.getId())
                 .topicId(flashcard.getTopic().getId())
@@ -160,9 +193,10 @@ public class FlashcardService {
                 .front(flashcard.getFront())
                 .back(flashcard.getBack())
                 .codeExample(flashcard.getCodeExample())
-                .reviewCount(flashcard.getReviewCount())
-                .correctCount(flashcard.getCorrectCount())
-                .nextReview(flashcard.getNextReview())
+                // User-specific review data
+                .reviewCount(review != null ? review.getReviewCount() : 0)
+                .correctCount(review != null ? review.getCorrectCount() : 0)
+                .nextReview(review != null ? review.getNextReview() : null)
                 .createdAt(flashcard.getCreatedAt())
                 .build();
     }

@@ -24,6 +24,13 @@ public class QuizHistory {
     private Long id;
 
     /**
+     * User đã làm quiz này
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    /**
      * Loại quiz: QUICK_QUIZ, TOPIC_QUIZ, MOCK_EXAM
      */
     @Column(name = "quiz_type", nullable = false, length = 20)

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container {
+            background: #f0f9ff;
+            border: 2px solid #6366f1;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #6366f1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>✅ Email Test Successful!</h1>
+        <p th:text="${message}">Your email configuration is working!</p>
+        <p><strong>OCP Study Email System</strong></p>
+    </div>
+</body>
+
+</html>

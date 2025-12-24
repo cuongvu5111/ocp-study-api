@@ -12,9 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -172,6 +177,19 @@ public class QuestionAdminController {
         }
         questionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * GET /admin/questions/template - Download CSV template
+     */
+    @GetMapping("/questions/template")
+    public ResponseEntity<Resource> downloadTemplate() throws IOException {
+        Resource resource = new ClassPathResource("templates/questions_template.csv");
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"questions_template.csv\"")
+                .header(HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
+                .body(resource);
     }
 
     /**

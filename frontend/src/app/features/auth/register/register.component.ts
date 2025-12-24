@@ -8,10 +8,10 @@ import { AuthService } from '../../../core/services/auth.service';
  * Register component - Form đăng ký.
  */
 @Component({
-    selector: 'app-register',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
-    template: `
+  selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  template: `
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
@@ -21,7 +21,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <form (ngSubmit)="onRegister()" class="auth-form">
           <div class="form-group">
-            <label for="username">Username</label>
+            <label for="username">Tài khoản</label>
             <input 
               type="text" 
               id="username" 
@@ -44,7 +44,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           <div class="form-group">
-            <label for="password">Password</label>
+            <label for="password">Mật khẩu</label>
             <input 
               type="password" 
               id="password" 
@@ -78,7 +78,7 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .auth-container {
       min-height: 100vh;
       display: flex;
@@ -90,11 +90,12 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .auth-card {
       width: 100%;
-      max-width: 400px;
+      max-width: 500px;
       background: var(--gradient-card);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-2xl);
-      padding: var(--spacing-8);
+      padding: var(--spacing-10);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     }
 
     .auth-header {
@@ -102,19 +103,20 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-bottom: var(--spacing-8);
 
       h1 {
-        font-size: var(--font-size-2xl);
+        font-size: 2.5rem;
         margin-bottom: var(--spacing-2);
       }
 
       p {
         color: var(--color-text-muted);
+        font-size: var(--font-size-lg);
       }
     }
 
     .auth-form {
       display: flex;
       flex-direction: column;
-      gap: var(--spacing-4);
+      gap: var(--spacing-5);
     }
 
     .form-group {
@@ -125,15 +127,16 @@ import { AuthService } from '../../../core/services/auth.service';
       label {
         font-weight: 500;
         color: var(--color-text-secondary);
+        font-size: var(--font-size-base);
       }
 
       input {
-        padding: var(--spacing-3) var(--spacing-4);
+        padding: var(--spacing-4) var(--spacing-5);
         background: var(--color-bg-secondary);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
         color: var(--color-text-primary);
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-lg);
 
         &:focus {
           outline: none;
@@ -199,45 +202,45 @@ import { AuthService } from '../../../core/services/auth.service';
   `]
 })
 export class RegisterComponent {
-    private authService = inject(AuthService);
-    private router = inject(Router);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-    username = '';
-    email = '';
-    password = '';
-    loading = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
+  username = '';
+  email = '';
+  password = '';
+  loading = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
 
-    onRegister(): void {
-        if (!this.username || !this.password) {
-            this.error.set('Vui lòng nhập username và password');
-            return;
-        }
-
-        if (this.password.length < 8) {
-            this.error.set('Password phải có ít nhất 8 ký tự');
-            return;
-        }
-
-        this.loading.set(true);
-        this.error.set(null);
-        this.success.set(null);
-
-        this.authService.register(this.username, this.password, this.email).subscribe({
-            next: (response) => {
-                this.loading.set(false);
-                if (response.token) {
-                    this.success.set('Đăng ký thành công!');
-                    setTimeout(() => this.router.navigate(['/dashboard']), 1000);
-                } else {
-                    this.error.set(response.message || 'Đăng ký thất bại');
-                }
-            },
-            error: (err) => {
-                this.loading.set(false);
-                this.error.set(err.error?.message || 'Đăng ký thất bại');
-            }
-        });
+  onRegister(): void {
+    if (!this.username || !this.password) {
+      this.error.set('Vui lòng nhập username và password');
+      return;
     }
+
+    if (this.password.length < 8) {
+      this.error.set('Password phải có ít nhất 8 ký tự');
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.success.set(null);
+
+    this.authService.register(this.username, this.password, this.email).subscribe({
+      next: (response) => {
+        this.loading.set(false);
+        if (response.token) {
+          this.success.set('Đăng ký thành công!');
+          setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+        } else {
+          this.error.set(response.message || 'Đăng ký thất bại');
+        }
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Đăng ký thất bại');
+      }
+    });
+  }
 }

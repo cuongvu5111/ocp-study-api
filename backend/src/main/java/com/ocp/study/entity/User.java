@@ -23,8 +23,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = true, nullable = false)
     private String username;
+
+    @Column(length = 100)
+    private String fullName;
 
     @Column(nullable = false)
     private String password;
@@ -43,4 +46,17 @@ public class User {
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    // Email preferences
+    @Column(name = "email_enabled", nullable = false)
+    @Builder.Default
+    private Boolean emailEnabled = true;
+
+    @Column(name = "daily_digest_enabled")
+    @Builder.Default
+    private Boolean dailyDigestEnabled = true;
+
+    public Boolean getEmailEnabled() {
+        return emailEnabled != null ? emailEnabled : true;
+    }
 }

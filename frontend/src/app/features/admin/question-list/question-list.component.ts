@@ -7,10 +7,10 @@ import { ApiService } from '../../../core/services/api.service';
  * Admin component - Danh sách câu hỏi với edit/delete.
  */
 @Component({
-    selector: 'app-question-list',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-question-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <div class="admin-container">
       <header class="page-header">
         <div class="header-left">
@@ -90,9 +90,9 @@ import { ApiService } from '../../../core/services/api.service';
                 </span>
               </td>
               <td class="actions">
-                <button class="btn btn--ghost btn--sm" title="Sửa" disabled>
+                <a [routerLink]="['/admin/questions/edit', q.id]" class="btn btn--ghost btn--sm" title="Sửa">
                   <span class="material-icons-outlined">edit</span>
-                </button>
+                </a>
                 <button class="btn btn--ghost btn--sm btn--danger" title="Xóa" (click)="deleteQuestion(q.id)">
                   <span class="material-icons-outlined">delete</span>
                 </button>
@@ -111,7 +111,7 @@ import { ApiService } from '../../../core/services/api.service';
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .admin-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -295,55 +295,55 @@ import { ApiService } from '../../../core/services/api.service';
   `]
 })
 export class QuestionListComponent implements OnInit {
-    private apiService = inject(ApiService);
+  private apiService = inject(ApiService);
 
-    questions = signal<any[]>([]);
-    loading = signal(true);
-    message = signal<string | null>(null);
-    isError = signal(false);
+  questions = signal<any[]>([]);
+  loading = signal(true);
+  message = signal<string | null>(null);
+  isError = signal(false);
 
-    ngOnInit() {
-        this.loadQuestions();
-    }
+  ngOnInit() {
+    this.loadQuestions();
+  }
 
-    loadQuestions() {
-        this.loading.set(true);
-        this.apiService.getQuestions().subscribe({
-            next: (data) => {
-                this.questions.set(data);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                console.error('Error loading questions:', err);
-                this.loading.set(false);
-                this.showMessage('Lỗi tải danh sách câu hỏi', true);
-            }
-        });
-    }
+  loadQuestions() {
+    this.loading.set(true);
+    this.apiService.getQuestions().subscribe({
+      next: (data) => {
+        this.questions.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading questions:', err);
+        this.loading.set(false);
+        this.showMessage('Lỗi tải danh sách câu hỏi', true);
+      }
+    });
+  }
 
-    getTopicCount(): number {
-        const topicIds = new Set(this.questions().map(q => q.topicId));
-        return topicIds.size;
-    }
+  getTopicCount(): number {
+    const topicIds = new Set(this.questions().map(q => q.topicId));
+    return topicIds.size;
+  }
 
-    deleteQuestion(id: number) {
-        if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) return;
+  deleteQuestion(id: number) {
+    if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) return;
 
-        this.apiService.deleteQuestion(id).subscribe({
-            next: () => {
-                this.questions.update(qs => qs.filter(q => q.id !== id));
-                this.showMessage('Xóa câu hỏi thành công', false);
-            },
-            error: (err) => {
-                console.error('Error deleting question:', err);
-                this.showMessage('Lỗi xóa câu hỏi', true);
-            }
-        });
-    }
+    this.apiService.deleteQuestion(id).subscribe({
+      next: () => {
+        this.questions.update(qs => qs.filter(q => q.id !== id));
+        this.showMessage('Xóa câu hỏi thành công', false);
+      },
+      error: (err) => {
+        console.error('Error deleting question:', err);
+        this.showMessage('Lỗi xóa câu hỏi', true);
+      }
+    });
+  }
 
-    showMessage(msg: string, error: boolean) {
-        this.message.set(msg);
-        this.isError.set(error);
-        setTimeout(() => this.message.set(null), 3000);
-    }
+  showMessage(msg: string, error: boolean) {
+    this.message.set(msg);
+    this.isError.set(error);
+    setTimeout(() => this.message.set(null), 3000);
+  }
 }

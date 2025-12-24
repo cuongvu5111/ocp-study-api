@@ -2,6 +2,9 @@
 -- Version: V2
 -- Description: Seed 12 topics OCP Java SE 11 và subtopics
 
+-- Set UTF-8 encoding for proper Vietnamese character support
+SET CLIENT_ENCODING TO 'UTF8';
+
 -- =====================================================
 -- TOPIC 1: Working with Java Data Types (Tháng 1)
 -- =====================================================
