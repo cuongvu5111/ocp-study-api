@@ -1,14 +1,16 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../core/services/auth.service';
 
 /**
  * Header component.
  * Hiển thị tiêu đề trang, search bar và user actions.
  */
 @Component({
-    selector: 'app-header',
-    standalone: true,
-    imports: [],
-    template: `
+  selector: 'app-header',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <header class="header">
       <div class="header__left">
         <button class="btn btn--ghost btn--icon mobile-menu">
@@ -44,14 +46,38 @@ import { Component, signal, computed } from '@angular/core';
           }
         </button>
         
-        <!-- User Avatar -->
-        <div class="user-avatar" title="Tài khoản">
-          <span>👤</span>
+        <!-- User Dropdown -->
+        <div class="user-dropdown">
+          <button 
+            class="user-avatar" 
+            (click)="toggleDropdown()"
+            title="Tài khoản"
+          >
+            <span class="material-icons-outlined">person</span>
+          </button>
+          
+          @if (isDropdownOpen()) {
+            <div class="dropdown-menu">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-icons-outlined">person</span>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-username">{{ authService.currentUser()?.fullName || authService.currentUser()?.username }}</span>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item" (click)="logout()">
+                <span class="material-icons-outlined">logout</span>
+                <span>Đăng xuất</span>
+              </button>
+            </div>
+          }
         </div>
       </div>
     </header>
   `,
-    styles: [`
+  styles: [`
     .header {
       position: fixed;
       top: 0;
@@ -180,6 +206,11 @@ import { Component, signal, computed } from '@angular/core';
       border-radius: var(--radius-full);
     }
     
+    /* User Dropdown */
+    .user-dropdown {
+      position: relative;
+    }
+    
     .user-avatar {
       width: 40px;
       height: 40px;
@@ -187,13 +218,109 @@ import { Component, signal, computed } from '@angular/core';
       align-items: center;
       justify-content: center;
       background: var(--gradient-primary);
+      border: none;
       border-radius: var(--radius-full);
       font-size: 20px;
       cursor: pointer;
       transition: transform var(--transition-fast);
+      color: white;
       
       &:hover {
         transform: scale(1.05);
+      }
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + var(--spacing-2));
+      right: 0;
+      min-width: 240px;
+      background-color: var(--color-bg-secondary);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: dropdownSlide 0.2s ease-out;
+    }
+    
+    @keyframes dropdownSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .dropdown-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-4);
+    }
+    
+    .dropdown-avatar {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-full);
+      color: white;
+      
+      .material-icons-outlined {
+        font-size: 24px;
+      }
+    }
+    
+    .dropdown-info {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-1);
+    }
+    
+    .dropdown-username {
+      font-weight: 600;
+      font-size: var(--font-size-base);
+      color: var(--color-text-primary);
+    }
+    
+    .dropdown-role {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .dropdown-divider {
+      height: 1px;
+      background-color: var(--color-border);
+    }
+    
+    .dropdown-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3) var(--spacing-4);
+      background: none;
+      border: none;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-base);
+      text-align: left;
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      
+      &:hover {
+        background-color: var(--color-bg-tertiary);
+      }
+      
+      .material-icons-outlined {
+        font-size: 20px;
+        color: var(--color-text-muted);
       }
     }
     
@@ -213,7 +340,19 @@ import { Component, signal, computed } from '@angular/core';
   `]
 })
 export class HeaderComponent {
-    pageTitle = signal('Dashboard');
-    streak = signal(5);
-    notifications = signal(3);
+  authService = inject(AuthService);
+
+  pageTitle = signal('Dashboard');
+  streak = signal(5);
+  notifications = signal(3);
+  isDropdownOpen = signal(false);
+
+  toggleDropdown() {
+    this.isDropdownOpen.update(open => !open);
+  }
+
+  logout() {
+    this.authService.logout();
+    this.isDropdownOpen.set(false);
+  }
 }

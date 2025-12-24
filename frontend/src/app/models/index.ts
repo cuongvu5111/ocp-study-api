@@ -1,4 +1,15 @@
 /**
+ * Interface cho User.
+ */
+export interface User {
+    id: number;
+    username: string;
+    fullName?: string;
+    email?: string;
+    role: string;
+}
+
+/**
  * Interface cho Topic từ API.
  */
 export interface Topic {
