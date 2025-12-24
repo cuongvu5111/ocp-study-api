@@ -1,0 +1,88 @@
+package com.ocp.study.controller;
+
+import com.ocp.study.dto.FlashcardDTO;
+import com.ocp.study.service.FlashcardService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * REST Controller cho Flashcards API.
+ * 
+ * @author OCP Study Team
+ * @since 1.0.0
+ */
+@RestController
+@RequestMapping("/flashcards")
+@RequiredArgsConstructor
+@Tag(name = "Flashcards", description = "API quản lý flashcards")
+public class FlashcardController {
+
+    private final FlashcardService flashcardService;
+
+    @GetMapping
+    @Operation(summary = "Lấy tất cả flashcards")
+    public ResponseEntity<List<FlashcardDTO>> getAllFlashcards() {
+        return ResponseEntity.ok(flashcardService.getAllFlashcards());
+    }
+
+    @GetMapping("/topic/{topicId}")
+    @Operation(summary = "Lấy flashcards theo topic")
+    public ResponseEntity<List<FlashcardDTO>> getFlashcardsByTopic(@PathVariable Long topicId) {
+        return ResponseEntity.ok(flashcardService.getFlashcardsByTopic(topicId));
+    }
+
+    @GetMapping("/review")
+    @Operation(summary = "Lấy flashcards cần review", description = "Trả về flashcards theo thuật toán Spaced Repetition")
+    public ResponseEntity<List<FlashcardDTO>> getFlashcardsToReview() {
+        return ResponseEntity.ok(flashcardService.getFlashcardsToReview());
+    }
+
+    @GetMapping("/review/topic/{topicId}")
+    @Operation(summary = "Lấy flashcards cần review theo topic")
+    public ResponseEntity<List<FlashcardDTO>> getFlashcardsToReviewByTopic(@PathVariable Long topicId) {
+        return ResponseEntity.ok(flashcardService.getFlashcardsToReviewByTopic(topicId));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Lấy flashcard theo ID")
+    public ResponseEntity<FlashcardDTO> getFlashcardById(@PathVariable Long id) {
+        return ResponseEntity.ok(flashcardService.getFlashcardById(id));
+    }
+
+    @PostMapping
+    @Operation(summary = "Tạo flashcard mới")
+    public ResponseEntity<FlashcardDTO> createFlashcard(@Valid @RequestBody FlashcardDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(flashcardService.createFlashcard(dto));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Cập nhật flashcard")
+    public ResponseEntity<FlashcardDTO> updateFlashcard(
+            @PathVariable Long id,
+            @Valid @RequestBody FlashcardDTO dto) {
+        return ResponseEntity.ok(flashcardService.updateFlashcard(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Xóa flashcard")
+    public ResponseEntity<Void> deleteFlashcard(@PathVariable Long id) {
+        flashcardService.deleteFlashcard(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/review")
+    @Operation(summary = "Đánh dấu đã review flashcard", description = "Cập nhật spaced repetition interval dựa trên correct/incorrect")
+    public ResponseEntity<FlashcardDTO> markReviewed(
+            @PathVariable Long id,
+            @RequestParam boolean correct) {
+        return ResponseEntity.ok(flashcardService.markReviewed(id, correct));
+    }
+}
