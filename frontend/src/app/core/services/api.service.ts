@@ -34,6 +34,18 @@ export class ApiService {
         return this.http.get<any[]>(`${this.baseUrl}/topics/month/${month}`);
     }
 
+    createTopic(data: any): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/topics`, data);
+    }
+
+    updateTopic(id: number, data: any): Observable<any> {
+        return this.http.put<any>(`${this.baseUrl}/topics/${id}`, data);
+    }
+
+    deleteTopic(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/topics/${id}`);
+    }
+
     // ==================== FLASHCARDS ====================
 
     getFlashcards(): Observable<any[]> {
@@ -143,5 +155,19 @@ export class ApiService {
 
     importQuestionsCSV(formData: FormData): Observable<any> {
         return this.http.post<any>(`${this.baseUrl}/admin/questions/import-csv`, formData);
+    }
+
+    // ==================== DOCUMENTS ====================
+
+    getDocuments(certificationId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.baseUrl}/documents?certificationId=${certificationId}`);
+    }
+
+    uploadDocument(formData: FormData): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/documents`, formData);
+    }
+
+    deleteDocument(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/documents/${id}`);
     }
 }

@@ -47,10 +47,14 @@ public class Certification {
     @Column(length = 50)
     private String icon;
 
+    @Column(name = "duration_months")
+    private Integer durationMonths;
+
     /**
      * Danh sách Topics thuộc chứng chỉ này
      */
     @OneToMany(mappedBy = "certification", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Topic> topics = new ArrayList<>();
 }

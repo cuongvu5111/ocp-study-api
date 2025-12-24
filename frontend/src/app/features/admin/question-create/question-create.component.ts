@@ -3,21 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
+import { CertificationService } from '../../../core/services/certification.service';
 
 interface Option {
-    key: string;
-    content: string;
-    isCorrect: boolean;
+  key: string;
+  content: string;
+  isCorrect: boolean;
 }
 
 /**
  * Admin component - Form tạo câu hỏi mới.
  */
 @Component({
-    selector: 'app-question-create',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
-    template: `
+  selector: 'app-question-create',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  template: `
     <div class="admin-container">
       <header class="page-header">
         <a routerLink="/dashboard" class="btn btn--ghost btn--icon">
@@ -27,11 +28,22 @@ interface Option {
       </header>
 
       <form (ngSubmit)="onSubmit()" class="question-form">
+        <!-- Certification -->
+        <div class="form-group">
+          <label for="cert">Chứng chỉ *</label>
+          <select id="cert" [(ngModel)]="selectedCertId" name="selectedCertId" (change)="onCertChange()" required>
+            <option [ngValue]="null">-- Chọn Chứng Chỉ --</option>
+            @for (cert of certifications(); track cert.id) {
+            <option [value]="cert.id">{{ cert.name }}</option>
+            }
+          </select>
+        </div>
+
         <!-- Topic -->
         <div class="form-group">
           <label for="topic">Topic *</label>
-          <select id="topic" [(ngModel)]="topicId" name="topicId" required>
-            <option value="">Chọn topic</option>
+          <select id="topic" [(ngModel)]="topicId" name="topicId" required [disabled]="!selectedCertId">
+            <option value="">-- Chọn topic --</option>
             @for (topic of topics(); track topic.id) {
             <option [value]="topic.id">{{ topic.name }}</option>
             }
@@ -142,7 +154,7 @@ interface Option {
       </form>
     </div>
   `,
-    styles: [`
+  styles: [`
     .admin-container {
       max-width: 800px;
       margin: 0 auto;
@@ -179,13 +191,18 @@ interface Option {
         background: var(--color-bg-secondary);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);
-        color: var(--color-text-primary);
+        color: #e2e8f0;
         font-size: var(--font-size-base);
 
         &:focus {
           outline: none;
           border-color: var(--color-primary);
         }
+      }
+      
+      select option {
+        background-color: #1e293b;
+        color: #e2e8f0;
       }
 
       .code-input {
@@ -281,85 +298,103 @@ interface Option {
   `]
 })
 export class QuestionCreateComponent implements OnInit {
-    private apiService = inject(ApiService);
-    private router = inject(Router);
+  private apiService = inject(ApiService);
+  private certService = inject(CertificationService);
+  private router = inject(Router);
 
-    topics = signal<any[]>([]);
-    loading = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
+  certifications = signal<any[]>([]);
+  topics = signal<any[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
 
-    topicId = '';
-    content = '';
-    codeSnippet = '';
-    difficulty = 2;
-    explanation = '';
-    correctIndex = 0;
+  selectedCertId: number | null = null;
+  topicId = '';
+  content = '';
+  codeSnippet = '';
+  difficulty = 2;
+  explanation = '';
+  correctIndex = 0;
 
-    options: Option[] = [
-        { key: 'A', content: '', isCorrect: true },
-        { key: 'B', content: '', isCorrect: false },
-        { key: 'C', content: '', isCorrect: false },
-        { key: 'D', content: '', isCorrect: false },
-    ];
+  options: Option[] = [
+    { key: 'A', content: '', isCorrect: true },
+    { key: 'B', content: '', isCorrect: false },
+    { key: 'C', content: '', isCorrect: false },
+    { key: 'D', content: '', isCorrect: false },
+  ];
 
-    ngOnInit() {
-        this.loadTopics();
+  ngOnInit() {
+    this.loadCertifications();
+  }
+
+  loadCertifications() {
+    this.certService.getAllCertifications().subscribe({
+      next: (data) => this.certifications.set(data),
+      error: (err) => console.error('Error loading certifications:', err)
+    });
+  }
+
+  onCertChange() {
+    this.topicId = '';
+    this.topics.set([]); // Clear topics
+    if (this.selectedCertId) {
+      this.loadTopics(this.selectedCertId);
+    }
+  }
+
+  loadTopics(certId: number) {
+    this.apiService.getTopics(certId).subscribe({
+      next: (data) => this.topics.set(data),
+      error: (err) => console.error('Error loading topics:', err)
+    });
+  }
+
+  onSubmit() {
+    if (!this.topicId || !this.content) {
+      this.error.set('Vui lòng điền đầy đủ thông tin');
+      return;
     }
 
-    loadTopics() {
-        this.apiService.getTopics().subscribe({
-            next: (data) => this.topics.set(data),
-            error: (err) => console.error('Error loading topics:', err)
-        });
+    // Check all options filled
+    if (this.options.some(o => !o.content)) {
+      this.error.set('Vui lòng điền đầy đủ 4 đáp án');
+      return;
     }
 
-    onSubmit() {
-        if (!this.topicId || !this.content) {
-            this.error.set('Vui lòng điền đầy đủ thông tin');
-            return;
-        }
+    // Set correct answer
+    this.options.forEach((opt, i) => opt.isCorrect = i === this.correctIndex);
 
-        // Check all options filled
-        if (this.options.some(o => !o.content)) {
-            this.error.set('Vui lòng điền đầy đủ 4 đáp án');
-            return;
-        }
+    const payload = {
+      topicId: Number(this.topicId),
+      content: this.content,
+      codeSnippet: this.codeSnippet || null,
+      questionType: 'SINGLE_CHOICE',
+      difficulty: this.difficulty,
+      explanation: this.explanation,
+      options: this.options
+    };
 
-        // Set correct answer
-        this.options.forEach((opt, i) => opt.isCorrect = i === this.correctIndex);
+    this.loading.set(true);
+    this.error.set(null);
 
-        const payload = {
-            topicId: Number(this.topicId),
-            content: this.content,
-            codeSnippet: this.codeSnippet || null,
-            questionType: 'SINGLE_CHOICE',
-            difficulty: this.difficulty,
-            explanation: this.explanation,
-            options: this.options
-        };
+    this.apiService.createQuestion(payload).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.success.set('Tạo câu hỏi thành công!');
+        this.resetForm();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.error.set(err.error?.message || 'Lỗi khi tạo câu hỏi');
+      }
+    });
+  }
 
-        this.loading.set(true);
-        this.error.set(null);
-
-        this.apiService.createQuestion(payload).subscribe({
-            next: () => {
-                this.loading.set(false);
-                this.success.set('Tạo câu hỏi thành công!');
-                this.resetForm();
-            },
-            error: (err) => {
-                this.loading.set(false);
-                this.error.set(err.error?.message || 'Lỗi khi tạo câu hỏi');
-            }
-        });
-    }
-
-    resetForm() {
-        this.content = '';
-        this.codeSnippet = '';
-        this.explanation = '';
-        this.correctIndex = 0;
-        this.options.forEach(o => o.content = '');
-    }
+  resetForm() {
+    this.content = '';
+    this.codeSnippet = '';
+    this.explanation = '';
+    this.correctIndex = 0;
+    this.options.forEach(o => o.content = '');
+  }
 }

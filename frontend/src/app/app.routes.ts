@@ -4,7 +4,7 @@ import { adminGuard, authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'certifications',
         pathMatch: 'full'
     },
     // Auth routes (public)
@@ -41,6 +41,13 @@ export const routes: Routes = [
             .then(m => m.TopicListComponent),
         canActivate: [authGuard],
         title: 'Topics - OCP Study'
+    },
+    {
+        path: 'documents',
+        loadComponent: () => import('./features/documents/document-list/document-list.component')
+            .then(m => m.DocumentListComponent),
+        canActivate: [authGuard],
+        title: 'Tài liệu - OCP Study'
     },
     {
         path: 'topics/:id',
@@ -91,6 +98,20 @@ export const routes: Routes = [
             .then(m => m.QuestionImportComponent),
         canActivate: [adminGuard],
         title: 'Import CSV - Admin'
+    },
+    {
+        path: 'admin/certifications/create',
+        loadComponent: () => import('./features/admin/certification-create/certification-create.component')
+            .then(m => m.CertificationCreateComponent),
+        canActivate: [adminGuard],
+        title: 'Tạo chứng chỉ - Admin'
+    },
+    {
+        path: 'admin/flashcards/create',
+        loadComponent: () => import('./features/admin/flashcard-create/flashcard-create.component')
+            .then(m => m.FlashcardCreateComponent),
+        canActivate: [adminGuard],
+        title: 'Tạo Flashcard - Admin'
     },
     {
         path: 'admin/questions',

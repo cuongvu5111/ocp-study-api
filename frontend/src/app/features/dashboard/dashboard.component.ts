@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ApiService } from '../../../core/services/api.service';
+import { ApiService } from '../../core/services/api.service';
 
 /**
  * Dashboard component - Trang chính hiển thị tổng quan tiến độ học.
@@ -18,6 +18,7 @@ export class DashboardComponent implements OnInit {
   daysStreak = signal(5);
   flashcardsDue = signal(12);
   currentTopic = signal('Lambda & Streams');
+  selectedCertName = signal('Java SE 11'); // Default value
 
   months = signal([
     {
@@ -81,6 +82,11 @@ export class DashboardComponent implements OnInit {
 
   loadDashboardData() {
     const certId = Number(localStorage.getItem('selectedCertificationId'));
+    const certName = localStorage.getItem('selectedCertificationName');
+    if (certName) {
+      this.selectedCertName.set(certName);
+    }
+
     this.apiService.getDashboard(certId || undefined).subscribe({
       next: (data: any) => {
         this.overallProgress.set(Math.round(data.overallProgress));

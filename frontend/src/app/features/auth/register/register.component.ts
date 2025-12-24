@@ -15,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <h1>🎯 OCP Study</h1>
+          <h1>🎯 VNPT Study</h1>
           <p>Tạo tài khoản mới</p>
         </div>
 
@@ -245,7 +245,7 @@ export class RegisterComponent {
         this.loading.set(false);
         if (response.token) {
           this.success.set('Đăng ký thành công!');
-          setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+          setTimeout(() => this.router.navigate(['/certifications']), 1000);
         } else {
           this.error.set(response.message || 'Đăng ký thất bại');
         }

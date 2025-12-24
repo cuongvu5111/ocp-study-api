@@ -35,7 +35,7 @@ export class CertificationListComponent implements OnInit {
 
     selectCertification(cert: Certification): void {
         localStorage.setItem('selectedCertificationId', cert.id.toString());
-        localStorage.setItem('selectedCertificationName', cert.name);
+        this.certificationService.setSelectedCertification(cert.name);
         this.router.navigate(['/dashboard']);
     }
 }

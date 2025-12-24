@@ -1,0 +1,43 @@
+<div class="doc-container">
+    <div class="header">
+        <h1>📚 Tài liệu học tập</h1>
+        <div class="btn btn-primary upload-btn">
+            <span class="material-icons-outlined">upload_file</span> Upload PDF
+            <input type="file" accept="application/pdf" class="upload-input" (change)="onFileSelected($event)">
+        </div>
+    </div>
+
+    @if (loading()) {
+    <div class="loading">Loading...</div>
+    }
+
+    <div class="doc-grid">
+        @for (doc of documents(); track doc.id) {
+        <div class="doc-card">
+            <div class="doc-icon">
+                <span class="material-icons-outlined">picture_as_pdf</span>
+            </div>
+            <div class="doc-info">
+                <h3 [title]="doc.title">{{ doc.title }}</h3>
+                <div class="meta">
+                    <div>{{ formatDate(doc.uploadedAt) }}</div>
+                    <div>{{ (doc.fileSize / 1024 / 1024).toFixed(2) }} MB</div>
+                </div>
+            </div>
+            <div class="doc-actions">
+                <button class="btn btn-sm btn-outline" (click)="viewDocument(doc)">
+                    Xem
+                </button>
+                <button class="btn btn-sm btn-danger icon-only" (click)="deleteDocument(doc.id)">
+                    <span class="material-icons-outlined">delete</span>
+                </button>
+            </div>
+        </div>
+        }
+        @empty {
+        <div class="empty-state" *ngIf="!loading()">
+            <p>Chưa có tài liệu nào.</p>
+        </div>
+        }
+    </div>
+</div>

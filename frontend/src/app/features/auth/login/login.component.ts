@@ -15,7 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <h1>🎯 OCP Study</h1>
+          <h1>🎯 VNPT Study</h1>
           <p>Đăng nhập để tiếp tục</p>
         </div>
 
@@ -199,7 +199,7 @@ export class LoginComponent {
       next: (response) => {
         this.loading.set(false);
         if (response.token) {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/certifications']);
         } else {
           this.error.set(response.message || 'Đăng nhập thất bại');
         }

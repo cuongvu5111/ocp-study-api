@@ -1,0 +1,96 @@
+<div class="create-cert-container">
+    <div class="header-actions">
+        <h1>Tạo Chứng Chỉ Mới</h1>
+        <button class="btn btn-secondary" routerLink="/dashboard">Hủy</button>
+    </div>
+
+    <div class="card">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+            <!-- General Info -->
+            <div class="form-section">
+                <h3>Thông tin chung</h3>
+                <div class="form-group">
+                    <label>Tên chứng chỉ</label>
+                    <input formControlName="name" placeholder="Ví dụ: Google Cloud Digital Leader">
+                </div>
+                <div class="form-group">
+                    <label>Mã chứng chỉ (Code)</label>
+                    <input formControlName="code" placeholder="Ví dụ: GCP-DL">
+                </div>
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea formControlName="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Icon</label>
+                    <div class="icon-grid">
+                        <div *ngFor="let icon of icons" class="icon-option"
+                            [class.selected]="form.get('icon')?.value === icon" (click)="form.patchValue({icon: icon})">
+                            <span class="material-icons-outlined">{{ icon }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Thời gian học (Tháng)</label>
+                    <select formControlName="durationMonths">
+                        <option [value]="1">1 Tháng</option>
+                        <option [value]="3">3 Tháng</option>
+                        <option [value]="6">6 Tháng</option>
+                        <option [value]="12">12 Tháng</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Study Plan -->
+            <div class="form-section">
+                <h3>Lộ trình học</h3>
+                <p style="color: #94a3b8; margin-bottom: 1rem;">Thêm các chủ đề (Topics) cần học cho từng tháng.</p>
+
+                <div *ngFor="let month of monthsArray" class="month-section">
+                    <h4>📅 Tháng {{ month }}</h4>
+
+                    <div class="topics-list">
+                        <div *ngFor="let i of getTopicsForMonth(month)">
+                            <div [formGroup]="getTopicControl(i)" class="topic-item">
+                                <div>
+                                    <label>Tên Topic</label>
+                                    <input formControlName="name" placeholder="Tên chủ đề">
+                                </div>
+                                <div>
+                                    <label>Mô tả ngắn</label>
+                                    <input formControlName="description" placeholder="Mô tả">
+                                </div>
+                                <div>
+                                    <label>Icon</label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <select formControlName="icon" style="flex: 1;">
+                                            <option *ngFor="let icon of icons" [value]="icon">{{ icon }}</option>
+                                        </select>
+                                        <div class="icon-preview">
+                                            <span class="material-icons-outlined">{{
+                                                getTopicControl(i).get('icon')?.value }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" (click)="removeTopic(i)">
+                                    <span class="material-icons-outlined">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" style="margin-top: 1rem;" (click)="addTopic(month)">
+                        + Thêm Topic vào Tháng {{ month }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="loading() || form.invalid"
+                    style="width: 100%;">
+                    {{ loading() ? 'Đang tạo...' : 'Tạo Chứng Chỉ' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

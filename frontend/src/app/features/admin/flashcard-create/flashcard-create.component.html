@@ -1,0 +1,65 @@
+<div class="admin-container">
+    <header class="page-header">
+        <a routerLink="/dashboard" class="btn btn--ghost btn--icon">
+            <span class="material-icons-outlined">arrow_back</span>
+        </a>
+        <h1>Tạo Flashcard Mới</h1>
+    </header>
+
+    <form (ngSubmit)="onSubmit()" class="flashcard-form">
+
+        <!-- Certification & Topic Selection -->
+        <div class="form-group">
+            <label for="cert">Chứng chỉ *</label>
+            <select id="cert" [(ngModel)]="selectedCertId" name="selectedCertId" (change)="onCertChange()" required>
+                <option [ngValue]="null">-- Chọn Chứng Chỉ --</option>
+                <option *ngFor="let cert of certifications()" [value]="cert.id">{{ cert.name }}</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="topic">Topic *</label>
+            <select id="topic" [(ngModel)]="topicId" name="topicId" required [disabled]="!selectedCertId">
+                <option [ngValue]="null">-- Chọn Topic --</option>
+                <option *ngFor="let topic of topics()" [value]="topic.id">{{ topic.name }}</option>
+            </select>
+        </div>
+
+        <!-- Flashcard Content -->
+        <div class="form-group">
+            <label for="front">Mặt trước (Câu hỏi / Khái niệm) *</label>
+            <textarea id="front" [(ngModel)]="front" name="front" placeholder="Nhập nội dung mặt trước..." rows="3"
+                required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="back">Mặt sau (Câu trả lời / Giải thích) *</label>
+            <textarea id="back" [(ngModel)]="back" name="back" placeholder="Nhập nội dung mặt sau..." rows="3"
+                required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="codeExample">Code Example (Optional)</label>
+            <textarea id="codeExample" [(ngModel)]="codeExample" name="codeExample"
+                placeholder="Nhập code snippet nếu có..." rows="5" class="code-input"></textarea>
+        </div>
+
+        @if (error()) {
+        <div class="error-message">{{ error() }}</div>
+        }
+
+        @if (success()) {
+        <div class="success-message">{{ success() }}</div>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn--ghost" (click)="resetForm()">
+                Reset
+            </button>
+            <button type="submit" class="btn btn--primary" [disabled]="loading()">
+                @if (loading()) { <span class="spinner-sm"></span> }
+                Tạo Flashcard
+            </button>
+        </div>
+    </form>
+</div>

@@ -2,6 +2,7 @@ import { Component, signal, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { CertificationService } from '../../../core/services/certification.service';
 
 interface NavItem {
   label: string;
@@ -24,8 +25,13 @@ interface NavItem {
       <div class="sidebar__logo">
         <span class="logo-icon">☕</span>
         <div class="logo-text">
-          <span class="logo-title">OCP Study</span>
-          <span class="logo-subtitle">Java SE 11</span>
+          <span class="logo-title">VNPT Study</span>
+          <div class="cert-selector">
+            <span class="logo-subtitle">{{ selectedCertName() }}</span>
+            <a routerLink="/certifications" class="btn-change-cert" title="Đổi chứng chỉ">
+              <span class="material-icons-outlined">edit</span>
+            </a>
+          </div>
         </div>
       </div>
       
@@ -110,12 +116,34 @@ interface NavItem {
       font-weight: 700;
       color: var(--color-text-primary);
     }
+
+    .cert-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     
     .logo-subtitle {
       font-size: var(--font-size-xs);
       color: var(--color-primary-light);
       text-transform: uppercase;
       letter-spacing: 1px;
+    }
+
+    .btn-change-cert {
+      color: var(--color-text-muted);
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: color 0.2s;
+      
+      &:hover {
+        color: var(--color-primary);
+      }
+      
+      .material-icons-outlined {
+        font-size: 16px;
+      }
     }
     
     .sidebar__nav {
@@ -297,23 +325,34 @@ interface NavItem {
     }
   `]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   authService = inject(AuthService);
+  certificationService = inject(CertificationService);
+  selectedCertName = signal('Java SE 11');
 
   navItems = signal<NavItem[]>([
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
     { label: 'Topics', icon: 'menu_book', route: '/topics' },
     { label: 'Flashcards', icon: 'style', route: '/flashcards' },
     { label: 'Quiz', icon: 'quiz', route: '/quiz' },
+    { label: 'Tài liệu', icon: 'description', route: '/documents' },
   ]);
 
   adminNavItems = signal<NavItem[]>([
+    { label: 'Tạo chứng chỉ', icon: 'post_add', route: '/admin/certifications/create' },
     { label: 'Tạo câu hỏi', icon: 'add_circle', route: '/admin/questions/create' },
+    { label: 'Tạo flashcard', icon: 'style', route: '/admin/flashcards/create' },
     { label: 'Import CSV', icon: 'upload_file', route: '/admin/questions/import' },
     { label: 'Quản lý câu hỏi', icon: 'list_alt', route: '/admin/questions' },
   ]);
 
   filteredNavItems = computed(() => this.navItems());
+
+  ngOnInit() {
+    this.certificationService.selectedCertName$.subscribe(name => {
+      this.selectedCertName.set(name);
+    });
+  }
 
   logout(): void {
     this.authService.logout();

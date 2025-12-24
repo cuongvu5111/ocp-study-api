@@ -29,4 +29,11 @@ public class CertificationController {
     public ResponseEntity<Certification> getCertificationById(@PathVariable Long id) {
         return ResponseEntity.ok(certificationService.getCertificationById(id));
     }
+
+    @PostMapping
+    @Operation(summary = "Tạo chứng chỉ mới", description = "Tạo chứng chỉ mới cùng với lộ trình học (topics)")
+    public ResponseEntity<Certification> createCertification(
+            @RequestBody com.ocp.study.dto.CreateCertificationRequest request) {
+        return ResponseEntity.ok(certificationService.createCertification(request));
+    }
 }
