@@ -113,6 +113,14 @@ export class ApiService {
 
     // ==================== ADMIN ====================
 
+    getQuestions(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.baseUrl}/admin/questions`);
+    }
+
+    getQuestionById(id: number): Observable<any> {
+        return this.http.get<any>(`${this.baseUrl}/admin/questions/${id}`);
+    }
+
     createQuestion(data: any): Observable<any> {
         return this.http.post<any>(`${this.baseUrl}/admin/questions`, data);
     }

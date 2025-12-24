@@ -1,6 +1,5 @@
 package com.ocp.study.service;
 
-import com.ocp.study.dto.TopicProgress.Status;
 import com.ocp.study.entity.Subtopic;
 import com.ocp.study.entity.Topic;
 import com.ocp.study.entity.TopicProgress;

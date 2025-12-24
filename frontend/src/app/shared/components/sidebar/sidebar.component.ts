@@ -1,21 +1,24 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, computed, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface NavItem {
-    label: string;
-    icon: string;
-    route: string;
+  label: string;
+  icon: string;
+  route: string;
+  adminOnly?: boolean;
 }
 
 /**
  * Sidebar navigation component.
- * Hiển thị logo và menu điều hướng chính.
+ * Hiển thị logo, menu điều hướng, user info và logout.
  */
 @Component({
-    selector: 'app-sidebar',
-    standalone: true,
-    imports: [RouterLink, RouterLinkActive],
-    template: `
+  selector: 'app-sidebar',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive],
+  template: `
     <aside class="sidebar">
       <!-- Logo -->
       <div class="sidebar__logo">
@@ -28,7 +31,7 @@ interface NavItem {
       
       <!-- Navigation -->
       <nav class="sidebar__nav">
-        @for (item of navItems(); track item.route) {
+        @for (item of filteredNavItems(); track item.route) {
           <a 
             [routerLink]="item.route" 
             routerLinkActive="active"
@@ -37,6 +40,23 @@ interface NavItem {
             <span class="material-icons-outlined nav-item__icon">{{ item.icon }}</span>
             <span class="nav-item__label">{{ item.label }}</span>
           </a>
+        }
+        
+        <!-- Admin Section -->
+        @if (authService.isAdmin()) {
+        <div class="nav-divider">
+          <span>Admin</span>
+        </div>
+        @for (item of adminNavItems(); track item.route) {
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="active"
+            class="nav-item nav-item--admin"
+          >
+            <span class="material-icons-outlined nav-item__icon">{{ item.icon }}</span>
+            <span class="nav-item__label">{{ item.label }}</span>
+          </a>
+        }
         }
       </nav>
       
@@ -52,19 +72,31 @@ interface NavItem {
         <p class="progress-detail">0/12 topics hoàn thành</p>
       </div>
       
-      <!-- Footer -->
-      <div class="sidebar__footer">
-        <div class="exam-info">
-          <span class="material-icons-outlined">event</span>
-          <div>
-            <span class="exam-label">Kỳ thi mục tiêu</span>
-            <span class="exam-date">1Z0-819</span>
+      <!-- User Info / Auth -->
+      <div class="sidebar__user">
+        @if (authService.isLoggedIn()) {
+        <div class="user-info">
+          <div class="user-avatar">
+            <span class="material-icons-outlined">person</span>
           </div>
+          <div class="user-details">
+            <span class="user-name">{{ authService.currentUser()?.username }}</span>
+            <span class="user-role">{{ authService.currentUser()?.role }}</span>
+          </div>
+          <button class="btn-logout" (click)="logout()" title="Đăng xuất">
+            <span class="material-icons-outlined">logout</span>
+          </button>
         </div>
+        } @else {
+        <a routerLink="/login" class="btn btn--primary btn--full">
+          <span class="material-icons-outlined">login</span>
+          Đăng nhập
+        </a>
+        }
       </div>
     </aside>
   `,
-    styles: [`
+  styles: [`
     .sidebar {
       position: fixed;
       top: 0;
@@ -114,6 +146,7 @@ interface NavItem {
       display: flex;
       flex-direction: column;
       gap: var(--spacing-2);
+      overflow-y: auto;
     }
     
     .nav-item {
@@ -142,6 +175,12 @@ interface NavItem {
       }
     }
     
+    .nav-item--admin {
+      &.active {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+    }
+    
     .nav-item__icon {
       font-size: 22px;
       color: var(--color-text-muted);
@@ -151,8 +190,27 @@ interface NavItem {
       font-weight: 500;
     }
     
+    .nav-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-4) var(--spacing-4) var(--spacing-2);
+      font-size: var(--font-size-xs);
+      color: var(--color-accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      
+      &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--color-border);
+      }
+    }
+    
     .sidebar__progress {
-      padding: var(--spacing-6);
+      padding: var(--spacing-4) var(--spacing-6);
       border-top: 1px solid var(--color-border);
     }
     
@@ -175,35 +233,83 @@ interface NavItem {
       color: var(--color-text-muted);
     }
     
-    .sidebar__footer {
+    .sidebar__user {
       padding: var(--spacing-4) var(--spacing-6);
       border-top: 1px solid var(--color-border);
     }
     
-    .exam-info {
+    .user-info {
       display: flex;
       align-items: center;
       gap: var(--spacing-3);
-      color: var(--color-text-secondary);
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       
       .material-icons-outlined {
-        color: var(--color-accent);
+        color: white;
+        font-size: 20px;
       }
+    }
+    
+    .user-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .user-name {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+    }
+    
+    .user-role {
+      font-size: var(--font-size-xs);
+      color: var(--color-accent);
+      text-transform: uppercase;
+    }
+    
+    .btn-logout {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-lg);
+      background: transparent;
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
       
-      div {
-        display: flex;
-        flex-direction: column;
-      }
-      
-      .exam-label {
-        font-size: var(--font-size-xs);
+      .material-icons-outlined {
+        font-size: 18px;
         color: var(--color-text-muted);
       }
       
-      .exam-date {
-        font-weight: 600;
-        color: var(--color-text-primary);
+      &:hover {
+        background: var(--color-error);
+        border-color: var(--color-error);
+        
+        .material-icons-outlined {
+          color: white;
+        }
       }
+    }
+    
+    .btn--full {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-2);
     }
     
     @media (max-width: 1024px) {
@@ -214,10 +320,24 @@ interface NavItem {
   `]
 })
 export class SidebarComponent {
-    navItems = signal<NavItem[]>([
-        { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-        { label: 'Topics', icon: 'menu_book', route: '/topics' },
-        { label: 'Flashcards', icon: 'style', route: '/flashcards' },
-        { label: 'Quiz', icon: 'quiz', route: '/quiz' },
-    ]);
+  authService = inject(AuthService);
+
+  navItems = signal<NavItem[]>([
+    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
+    { label: 'Topics', icon: 'menu_book', route: '/topics' },
+    { label: 'Flashcards', icon: 'style', route: '/flashcards' },
+    { label: 'Quiz', icon: 'quiz', route: '/quiz' },
+  ]);
+
+  adminNavItems = signal<NavItem[]>([
+    { label: 'Tạo câu hỏi', icon: 'add_circle', route: '/admin/questions/create' },
+    { label: 'Import CSV', icon: 'upload_file', route: '/admin/questions/import' },
+    { label: 'Quản lý câu hỏi', icon: 'list_alt', route: '/admin/questions' },
+  ]);
+
+  filteredNavItems = computed(() => this.navItems());
+
+  logout(): void {
+    this.authService.logout();
+  }
 }

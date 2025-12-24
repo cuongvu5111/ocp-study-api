@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * REST Controller cho Progress API.
  * 
@@ -25,11 +27,12 @@ public class ProgressController {
 
     @PostMapping("/subtopic/{subtopicId}/status")
     @Operation(summary = "Cập nhật trạng thái học subtopic")
-    public ResponseEntity<TopicProgress> updateStatus(
+    public ResponseEntity<?> updateStatus(
             @PathVariable Long subtopicId,
             @RequestParam TopicProgress.Status status,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
-        return ResponseEntity.ok(progressService.updateProgress(userId, subtopicId, status));
+        progressService.updateProgress(userId, subtopicId, status);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Updated successfully"));
     }
 
     @PostMapping("/subtopic/{subtopicId}/percentage")

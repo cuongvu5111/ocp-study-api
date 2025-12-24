@@ -79,6 +79,13 @@ export const routes: Routes = [
         title: 'Import CSV - Admin'
     },
     {
+        path: 'admin/questions',
+        loadComponent: () => import('./features/admin/question-list/question-list.component')
+            .then(m => m.QuestionListComponent),
+        canActivate: [adminGuard],
+        title: 'Quản lý câu hỏi - Admin'
+    },
+    {
         path: '**',
         redirectTo: 'dashboard'
     }
