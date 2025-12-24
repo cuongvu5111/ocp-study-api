@@ -18,8 +18,12 @@ export class ApiService {
 
     // ==================== TOPICS ====================
 
-    getTopics(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.baseUrl}/topics`);
+    getTopics(certificationId?: number): Observable<any[]> {
+        let url = `${this.baseUrl}/topics`;
+        if (certificationId) {
+            url += `?certificationId=${certificationId}`;
+        }
+        return this.http.get<any[]>(url);
     }
 
     getTopicById(id: number): Observable<any> {
@@ -82,8 +86,12 @@ export class ApiService {
 
     // ==================== DASHBOARD ====================
 
-    getDashboard(): Observable<any> {
-        return this.http.get<any>(`${this.baseUrl}/dashboard`);
+    getDashboard(certificationId?: number): Observable<any> {
+        let url = `${this.baseUrl}/dashboard`;
+        if (certificationId) {
+            url += `?certificationId=${certificationId}`;
+        }
+        return this.http.get<any>(url);
     }
 
     recordStudySession(minutes: number): Observable<void> {

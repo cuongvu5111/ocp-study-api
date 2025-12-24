@@ -20,6 +20,8 @@ public interface SubtopicRepository extends JpaRepository<Subtopic, Long> {
      */
     List<Subtopic> findByTopicIdOrderByOrderIndexAsc(Long topicId);
 
+    long countByTopic_Certification_Id(Long certificationId);
+
     /**
      * Lấy subtopics theo priority
      */

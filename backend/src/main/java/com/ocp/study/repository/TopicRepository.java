@@ -37,4 +37,12 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
      */
     @Query("SELECT DISTINCT t FROM Topic t LEFT JOIN FETCH t.subtopics ORDER BY t.orderIndex")
     List<Topic> findAllWithSubtopics();
+
+    /**
+     * Lấy tất cả topics theo certificationId với subtopics
+     */
+    @Query("SELECT DISTINCT t FROM Topic t LEFT JOIN FETCH t.subtopics WHERE t.certification.id = :certificationId ORDER BY t.orderIndex")
+    List<Topic> findAllWithSubtopicsByCertificationId(Long certificationId);
+
+    long countByCertificationId(Long certificationId);
 }

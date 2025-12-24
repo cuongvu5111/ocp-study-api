@@ -28,10 +28,11 @@ public class TopicController {
     private static final String DEFAULT_USER_ID = "default-user";
 
     @GetMapping
-    @Operation(summary = "Lấy tất cả topics", description = "Trả về danh sách tất cả topics với progress")
+    @Operation(summary = "Lấy tất cả topics", description = "Trả về danh sách tất cả topics với progress, lọc theo certificationId")
     public ResponseEntity<List<TopicDTO>> getAllTopics(
-            @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
-        return ResponseEntity.ok(topicService.getAllTopics(userId));
+            @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId,
+            @RequestParam(required = false) Long certificationId) {
+        return ResponseEntity.ok(topicService.getAllTopics(userId, certificationId));
     }
 
     @GetMapping("/{id}")

@@ -21,6 +21,8 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      */
     List<Question> findByTopicId(Long topicId);
 
+    long countByTopic_Certification_Id(Long certificationId);
+
     /**
      * Lấy questions với options (eager fetch)
      */

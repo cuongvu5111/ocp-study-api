@@ -93,4 +93,12 @@ public class Topic {
         subtopics.remove(subtopic);
         subtopic.setTopic(null);
     }
+
+    /**
+     * Chứng chỉ mà topic này thuộc về
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "certification_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore // Prevent infinite recursion if serialized directly
+    private Certification certification;
 }

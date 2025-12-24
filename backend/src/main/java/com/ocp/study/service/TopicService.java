@@ -27,113 +27,123 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class TopicService {
 
-    private final TopicRepository topicRepository;
-    private final SubtopicRepository subtopicRepository;
-    private final TopicProgressRepository progressRepository;
+        private final TopicRepository topicRepository;
+        private final SubtopicRepository subtopicRepository;
+        private final TopicProgressRepository progressRepository;
 
-    /**
-     * Lấy tất cả topics với progress của user
-     */
-    public List<TopicDTO> getAllTopics(String userId) {
-        List<Topic> topics = topicRepository.findAllWithSubtopics();
-        List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
+        /**
+         * Lấy tất cả topics với progress của user
+         */
+        /**
+         * Lấy tất cả topics với progress của user theo certificate
+         */
+        public List<TopicDTO> getAllTopics(String userId, Long certificationId) {
+                List<Topic> topics;
+                if (certificationId != null) {
+                        topics = topicRepository.findAllWithSubtopicsByCertificationId(certificationId);
+                } else {
+                        // Fallback for compatibility or admin view
+                        topics = topicRepository.findAllWithSubtopics();
+                }
 
-        // Map progress theo subtopicId để lookup nhanh
-        Map<Long, TopicProgress> progressMap = userProgress.stream()
-                .collect(Collectors.toMap(
-                        p -> p.getSubtopic().getId(),
-                        p -> p,
-                        (a, b) -> b));
+                List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
 
-        return topics.stream()
-                .map(topic -> mapToDTO(topic, progressMap))
-                .collect(Collectors.toList());
-    }
+                // Map progress theo subtopicId để lookup nhanh
+                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                                .collect(Collectors.toMap(
+                                                p -> p.getSubtopic().getId(),
+                                                p -> p,
+                                                (a, b) -> b));
 
-    /**
-     * Lấy topic theo ID với subtopics và progress
-     */
-    public TopicDTO getTopicById(Long id, String userId) {
-        Topic topic = topicRepository.findByIdWithSubtopics(id);
-        if (topic == null) {
-            throw new RuntimeException("Topic không tồn tại: " + id);
+                return topics.stream()
+                                .map(topic -> mapToDTO(topic, progressMap))
+                                .collect(Collectors.toList());
         }
 
-        List<TopicProgress> userProgress = progressRepository.findByUserIdAndTopicId(userId, id);
-        Map<Long, TopicProgress> progressMap = userProgress.stream()
-                .collect(Collectors.toMap(
-                        p -> p.getSubtopic().getId(),
-                        p -> p,
-                        (a, b) -> b));
+        /**
+         * Lấy topic theo ID với subtopics và progress
+         */
+        public TopicDTO getTopicById(Long id, String userId) {
+                Topic topic = topicRepository.findByIdWithSubtopics(id);
+                if (topic == null) {
+                        throw new RuntimeException("Topic không tồn tại: " + id);
+                }
 
-        return mapToDTO(topic, progressMap);
-    }
+                List<TopicProgress> userProgress = progressRepository.findByUserIdAndTopicId(userId, id);
+                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                                .collect(Collectors.toMap(
+                                                p -> p.getSubtopic().getId(),
+                                                p -> p,
+                                                (a, b) -> b));
 
-    /**
-     * Lấy topics theo tháng
-     */
-    public List<TopicDTO> getTopicsByMonth(Integer month, String userId) {
-        List<Topic> topics = topicRepository.findByMonthOrderByOrderIndexAsc(month);
-        List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
+                return mapToDTO(topic, progressMap);
+        }
 
-        Map<Long, TopicProgress> progressMap = userProgress.stream()
-                .collect(Collectors.toMap(
-                        p -> p.getSubtopic().getId(),
-                        p -> p,
-                        (a, b) -> b));
+        /**
+         * Lấy topics theo tháng
+         */
+        public List<TopicDTO> getTopicsByMonth(Integer month, String userId) {
+                List<Topic> topics = topicRepository.findByMonthOrderByOrderIndexAsc(month);
+                List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
 
-        return topics.stream()
-                .map(topic -> mapToDTO(topic, progressMap))
-                .collect(Collectors.toList());
-    }
+                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                                .collect(Collectors.toMap(
+                                                p -> p.getSubtopic().getId(),
+                                                p -> p,
+                                                (a, b) -> b));
 
-    /**
-     * Map Topic entity sang DTO với progress info
-     */
-    private TopicDTO mapToDTO(Topic topic, Map<Long, TopicProgress> progressMap) {
-        List<SubtopicDTO> subtopicDTOs = topic.getSubtopics().stream()
-                .map(subtopic -> mapSubtopicToDTO(subtopic, progressMap.get(subtopic.getId())))
-                .collect(Collectors.toList());
+                return topics.stream()
+                                .map(topic -> mapToDTO(topic, progressMap))
+                                .collect(Collectors.toList());
+        }
 
-        int totalSubtopics = subtopicDTOs.size();
-        int completedSubtopics = (int) subtopicDTOs.stream()
-                .filter(s -> s.getStatus() == TopicProgress.Status.COMPLETED)
-                .count();
+        /**
+         * Map Topic entity sang DTO với progress info
+         */
+        private TopicDTO mapToDTO(Topic topic, Map<Long, TopicProgress> progressMap) {
+                List<SubtopicDTO> subtopicDTOs = topic.getSubtopics().stream()
+                                .map(subtopic -> mapSubtopicToDTO(subtopic, progressMap.get(subtopic.getId())))
+                                .collect(Collectors.toList());
 
-        double progressPercentage = totalSubtopics > 0
-                ? (double) completedSubtopics / totalSubtopics * 100
-                : 0;
+                int totalSubtopics = subtopicDTOs.size();
+                int completedSubtopics = (int) subtopicDTOs.stream()
+                                .filter(s -> s.getStatus() == TopicProgress.Status.COMPLETED)
+                                .count();
 
-        return TopicDTO.builder()
-                .id(topic.getId())
-                .name(topic.getName())
-                .description(topic.getDescription())
-                .icon(topic.getIcon())
-                .month(topic.getMonth())
-                .orderIndex(topic.getOrderIndex())
-                .estimatedDays(topic.getEstimatedDays())
-                .subtopics(subtopicDTOs)
-                .completedSubtopics(completedSubtopics)
-                .totalSubtopics(totalSubtopics)
-                .progressPercentage(progressPercentage)
-                .build();
-    }
+                double progressPercentage = totalSubtopics > 0
+                                ? (double) completedSubtopics / totalSubtopics * 100
+                                : 0;
 
-    /**
-     * Map Subtopic entity sang DTO với progress
-     */
-    private SubtopicDTO mapSubtopicToDTO(Subtopic subtopic, TopicProgress progress) {
-        return SubtopicDTO.builder()
-                .id(subtopic.getId())
-                .topicId(subtopic.getTopic().getId())
-                .name(subtopic.getName())
-                .description(subtopic.getDescription())
-                .difficulty(subtopic.getDifficulty())
-                .estimatedDays(subtopic.getEstimatedDays())
-                .priority(subtopic.getPriority())
-                .orderIndex(subtopic.getOrderIndex())
-                .status(progress != null ? progress.getStatus() : TopicProgress.Status.NOT_STARTED)
-                .completionPercentage(progress != null ? progress.getCompletionPercentage() : 0)
-                .build();
-    }
+                return TopicDTO.builder()
+                                .id(topic.getId())
+                                .name(topic.getName())
+                                .description(topic.getDescription())
+                                .icon(topic.getIcon())
+                                .month(topic.getMonth())
+                                .orderIndex(topic.getOrderIndex())
+                                .estimatedDays(topic.getEstimatedDays())
+                                .subtopics(subtopicDTOs)
+                                .completedSubtopics(completedSubtopics)
+                                .totalSubtopics(totalSubtopics)
+                                .progressPercentage(progressPercentage)
+                                .build();
+        }
+
+        /**
+         * Map Subtopic entity sang DTO với progress
+         */
+        private SubtopicDTO mapSubtopicToDTO(Subtopic subtopic, TopicProgress progress) {
+                return SubtopicDTO.builder()
+                                .id(subtopic.getId())
+                                .topicId(subtopic.getTopic().getId())
+                                .name(subtopic.getName())
+                                .description(subtopic.getDescription())
+                                .difficulty(subtopic.getDifficulty())
+                                .estimatedDays(subtopic.getEstimatedDays())
+                                .priority(subtopic.getPriority())
+                                .orderIndex(subtopic.getOrderIndex())
+                                .status(progress != null ? progress.getStatus() : TopicProgress.Status.NOT_STARTED)
+                                .completionPercentage(progress != null ? progress.getCompletionPercentage() : 0)
+                                .build();
+        }
 }

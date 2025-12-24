@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ApiService } from '../../../core/services/api.service';
 
 /**
  * Dashboard component - Trang chính hiển thị tổng quan tiến độ học.
@@ -69,14 +70,53 @@ export class DashboardComponent implements OnInit {
     },
   ]);
 
-  calendarDays = signal(this.generateCalendarDays());
+  // Initialize with empty array or existing generator if needed immediately
+  calendarDays = signal<any[]>([]);
+
+  private apiService = inject(ApiService);
 
   ngOnInit() {
-    // Load data from API when ready
+    this.loadDashboardData();
+  }
+
+  loadDashboardData() {
+    const certId = Number(localStorage.getItem('selectedCertificationId'));
+    this.apiService.getDashboard(certId || undefined).subscribe({
+      next: (data: any) => {
+        this.overallProgress.set(Math.round(data.overallProgress));
+        this.daysStreak.set(data.currentStreak);
+        this.flashcardsDue.set(data.flashcardsDue);
+
+        if (data.todaySubtopics && data.todaySubtopics.length > 0) {
+          this.currentTopic.set(data.todaySubtopics[0].name);
+        } else {
+          this.currentTopic.set('Chưa có');
+        }
+
+        // Map calendar data if needed
+        if (data.studyCalendar) {
+          const calendar = this.generateCalendarDaysFromData(data.studyCalendar);
+          this.calendarDays.set(calendar);
+        } else {
+          // Fallback to local gen if no data
+          this.calendarDays.set(this.generateCalendarDays());
+        }
+      },
+      error: (err: any) => console.error('Failed to load dashboard', err)
+    });
+  }
+
+  private generateCalendarDaysFromData(apiData: any[]) {
+    return apiData.map((d: any) => ({
+      date: new Date(d.date).toLocaleDateString('vi-VN'),
+      minutes: d.minutesStudied,
+      hasActivity: d.hasActivity,
+      isToday: false // Logic needed to check if today
+    }));
   }
 
   private generateCalendarDays() {
-    const days = [];
+    const days: any[] = [];
     const today = new Date();
 
     for (let i = 27; i >= 0; i--) {

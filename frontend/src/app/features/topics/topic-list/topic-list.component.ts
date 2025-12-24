@@ -38,7 +38,8 @@ export class TopicListComponent implements OnInit {
 
   loadTopics() {
     this.loading.set(true);
-    this.apiService.getTopics().subscribe({
+    const certId = Number(localStorage.getItem('selectedCertificationId'));
+    this.apiService.getTopics(certId || undefined).subscribe({
       next: (data) => {
         this.topics.set(data);
         this.loading.set(false);

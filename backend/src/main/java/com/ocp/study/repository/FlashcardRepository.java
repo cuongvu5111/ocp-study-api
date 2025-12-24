@@ -27,6 +27,8 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
      */
     List<Flashcard> findBySubtopicIdOrderByCreatedAtDesc(Long subtopicId);
 
+    long countByTopic_Certification_Id(Long certificationId);
+
     /**
      * Lấy flashcards cần review (next_review <= now)
      */

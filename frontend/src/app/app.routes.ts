@@ -20,6 +20,13 @@ export const routes: Routes = [
             .then(m => m.RegisterComponent),
         title: 'Đăng ký - OCP Study'
     },
+    {
+        path: 'certifications',
+        loadComponent: () => import('./features/certification/certification-list/certification-list.component')
+            .then(m => m.CertificationListComponent),
+        canActivate: [authGuard],
+        title: 'Chọn Chứng Chỉ - OCP Study'
+    },
     // Main routes (require login)
     {
         path: 'dashboard',

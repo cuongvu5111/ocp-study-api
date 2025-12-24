@@ -49,4 +49,16 @@ public interface TopicProgressRepository extends JpaRepository<TopicProgress, Lo
      */
     @Query("SELECT COALESCE(AVG(p.completionPercentage), 0) FROM TopicProgress p WHERE p.userId = :userId")
     Double getAverageCompletionByUserId(String userId);
+
+    /**
+     * Đếm số subtopics đã hoàn thành theo user và certification
+     */
+    @Query("SELECT COUNT(p) FROM TopicProgress p WHERE p.userId = :userId AND p.topic.certification.id = :certificationId AND p.status = 'COMPLETED'")
+    long countCompletedByUserIdAndCertificationId(String userId, Long certificationId);
+
+    /**
+     * Tính % hoàn thành tổng thể theo certification
+     */
+    @Query("SELECT COALESCE(AVG(p.completionPercentage), 0) FROM TopicProgress p WHERE p.userId = :userId AND p.topic.certification.id = :certificationId")
+    Double getAverageCompletionByUserIdAndCertificationId(String userId, Long certificationId);
 }

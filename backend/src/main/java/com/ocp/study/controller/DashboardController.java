@@ -26,8 +26,9 @@ public class DashboardController {
     @GetMapping
     @Operation(summary = "Lấy dữ liệu dashboard", description = "Trả về tổng quan tiến độ, streak, flashcards due, etc.")
     public ResponseEntity<DashboardDTO> getDashboard(
-            @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
-        return ResponseEntity.ok(dashboardService.getDashboard(userId));
+            @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId,
+            @RequestParam(required = false) Long certificationId) {
+        return ResponseEntity.ok(dashboardService.getDashboard(userId, certificationId));
     }
 
     @PostMapping("/study-session")

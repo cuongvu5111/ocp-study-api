@@ -1,0 +1,21 @@
+<div class="cert-container">
+    <div class="header">
+        <h1>Chọn Chứng Chỉ</h1>
+        <p>Chọn chứng chỉ bạn muốn ôn tập</p>
+    </div>
+
+    <div class="cert-grid" *ngIf="!isLoading">
+        <div class="cert-card" *ngFor="let cert of certifications" (click)="selectCertification(cert)">
+            <div class="cert-icon">{{ cert.icon }}</div>
+            <div class="cert-info">
+                <h3>{{ cert.name }}</h3>
+                <p class="cert-code">{{ cert.code }}</p>
+                <p class="cert-desc">{{ cert.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" *ngIf="isLoading">
+        <p>Đang tải danh sách...</p>
+    </div>
+</div>
