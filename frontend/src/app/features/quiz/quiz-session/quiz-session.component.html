@@ -1,0 +1,162 @@
+<div class="quiz-session">
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Đang tải câu hỏi...</p>
+    </div>
+    } @else if (showResult()) {
+    <!-- Result Screen -->
+    <div class="result-screen">
+        <div class="result-header" [class.pass]="score() >= 68">
+            <div class="result-icon">
+                @if (score() >= 68) {
+                <span>🎉</span>
+                } @else {
+                <span>😔</span>
+                }
+            </div>
+            <h1>{{ score() >= 68 ? 'Chúc mừng!' : 'Cần cố gắng thêm!' }}</h1>
+            <p>{{ score() >= 68 ? 'Bạn đã đạt điểm pass!' : 'Điểm chưa đạt yêu cầu 68%' }}</p>
+        </div>
+
+        <div class="score-card">
+            <div class="score-value">{{ score() }}%</div>
+            <div class="score-detail">{{ correctCount() }}/{{ questions().length }} câu đúng</div>
+        </div>
+
+        <div class="result-stats">
+            <div class="stat">
+                <span class="material-icons-outlined">schedule</span>
+                <span>{{ formatTime(elapsedTime()) }}</span>
+            </div>
+            <div class="stat">
+                <span class="material-icons-outlined">check_circle</span>
+                <span>{{ correctCount() }} đúng</span>
+            </div>
+            <div class="stat">
+                <span class="material-icons-outlined">cancel</span>
+                <span>{{ questions().length - correctCount() }} sai</span>
+            </div>
+        </div>
+
+        <!-- Review Answers -->
+        <div class="review-section">
+            <h2>Review câu trả lời</h2>
+            <div class="review-list">
+                @for (question of questions(); track question.id; let i = $index) {
+                <div class="review-item" [class.correct]="answers()[i] === question.correctAnswer"
+                    [class.incorrect]="answers()[i] !== question.correctAnswer">
+                    <div class="review-header">
+                        <span class="question-num">Câu {{ i + 1 }}</span>
+                        @if (answers()[i] === question.correctAnswer) {
+                        <span class="badge badge--success">Đúng</span>
+                        } @else {
+                        <span class="badge badge--error">Sai</span>
+                        }
+                    </div>
+                    <p class="review-question">{{ question.question }}</p>
+                    <div class="review-answers">
+                        <div class="your-answer">
+                            <span class="label">Bạn chọn:</span>
+                            <span>{{ answers()[i] !== undefined ? question.options[answers()[i]!] : 'Chưa trả lời'
+                                }}</span>
+                        </div>
+                        @if (answers()[i] !== question.correctAnswer) {
+                        <div class="correct-answer">
+                            <span class="label">Đáp án đúng:</span>
+                            <span>{{ question.options[question.correctAnswer] }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <div class="result-actions">
+            <button class="btn btn--secondary" (click)="restartQuiz()">
+                <span class="material-icons-outlined">refresh</span>
+                Làm lại
+            </button>
+            <a routerLink="/quiz" class="btn btn--primary">
+                <span class="material-icons-outlined">arrow_back</span>
+                Quay lại
+            </a>
+        </div>
+    </div>
+    } @else {
+    <!-- Quiz Header -->
+    <header class="quiz-header">
+        <a routerLink="/quiz" class="btn btn--ghost btn--icon">
+            <span class="material-icons-outlined">close</span>
+        </a>
+        <div class="progress-info">
+            <span>Câu {{ currentIndex() + 1 }}/{{ questions().length }}</span>
+            <div class="progress">
+                <div class="progress__bar" [style.width.%]="((currentIndex() + 1) / questions().length) * 100"></div>
+            </div>
+        </div>
+        <div class="timer" [class.warning]="remainingTime() < 300">
+            <span class="material-icons-outlined">timer</span>
+            {{ formatTime(remainingTime()) }}
+        </div>
+    </header>
+
+    <!-- Question Card -->
+    <div class="question-card">
+        <div class="question-header">
+            <span class="question-topic">{{ currentQuestion()!.topicName }}</span>
+            <span class="question-difficulty">
+                @for (star of [1,2,3]; track star) {
+                <span class="star" [class.filled]="star <= currentQuestion()!.difficulty">★</span>
+                }
+            </span>
+        </div>
+
+        <h2 class="question-text">{{ currentQuestion()!.question }}</h2>
+
+        @if (currentQuestion()!.codeSnippet) {
+        <pre class="code-snippet"><code>{{ currentQuestion()!.codeSnippet }}</code></pre>
+        }
+
+        <div class="options-list">
+            @for (option of currentQuestion()!.options; track option; let idx = $index) {
+            <button class="option-btn" [class.selected]="answers()[currentIndex()] === idx" (click)="selectAnswer(idx)">
+                <span class="option-letter">{{ ['A', 'B', 'C', 'D'][idx] }}</span>
+                <span class="option-text">{{ option }}</span>
+                @if (answers()[currentIndex()] === idx) {
+                <span class="material-icons-outlined">check</span>
+                }
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="quiz-nav">
+        <button class="btn btn--ghost" [disabled]="currentIndex() === 0" (click)="prevQuestion()">
+            <span class="material-icons-outlined">arrow_back</span>
+            Câu trước
+        </button>
+
+        <div class="question-dots">
+            @for (q of questions(); track q.id; let i = $index) {
+            <button class="dot" [class.current]="i === currentIndex()" [class.answered]="answers()[i] !== undefined"
+                (click)="goToQuestion(i)"></button>
+            }
+        </div>
+
+        @if (currentIndex() === questions().length - 1) {
+        <button class="btn btn--primary" (click)="submitQuiz()">
+            <span class="material-icons-outlined">done_all</span>
+            Nộp bài
+        </button>
+        } @else {
+        <button class="btn btn--primary" (click)="nextQuestion()">
+            Câu tiếp
+            <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+        }
+    </div>
+    }
+</div>

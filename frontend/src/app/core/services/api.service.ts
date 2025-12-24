@@ -103,11 +103,29 @@ export class ApiService {
         return this.http.get<any[]>(url);
     }
 
-    submitQuiz(answers: any[]): Observable<any> {
-        return this.http.post<any>(`${this.baseUrl}/quiz/submit`, { answers });
+    submitQuiz(submission: any): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/quiz/submit`, submission);
     }
 
     getQuizHistory(): Observable<any[]> {
         return this.http.get<any[]>(`${this.baseUrl}/quiz/history`);
+    }
+
+    // ==================== ADMIN ====================
+
+    createQuestion(data: any): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/admin/questions`, data);
+    }
+
+    updateQuestion(id: number, data: any): Observable<any> {
+        return this.http.put<any>(`${this.baseUrl}/admin/questions/${id}`, data);
+    }
+
+    deleteQuestion(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/admin/questions/${id}`);
+    }
+
+    importQuestionsCSV(formData: FormData): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/admin/questions/import-csv`, formData);
     }
 }

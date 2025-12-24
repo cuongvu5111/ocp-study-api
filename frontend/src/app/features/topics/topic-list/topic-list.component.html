@@ -1,0 +1,65 @@
+<div class="topic-list">
+    <header class="page-header">
+        <div>
+            <h1>Topics OCP Java SE 11</h1>
+            <p>12 chủ đề cần master để đạt chứng chỉ 1Z0-819</p>
+        </div>
+        <div class="header-stats">
+            <span class="stat">
+                <strong>{{ completedTopics() }}</strong>/12 hoàn thành
+            </span>
+        </div>
+    </header>
+
+    <!-- Filter by Month -->
+    <div class="month-filter">
+        <button class="filter-btn" [class.active]="selectedMonth() === 0" (click)="selectedMonth.set(0)">
+            Tất cả
+        </button>
+        @for (m of [1, 2, 3, 4, 5, 6]; track m) {
+        <button class="filter-btn" [class.active]="selectedMonth() === m" (click)="selectedMonth.set(m)">
+            Tháng {{ m }}
+        </button>
+        }
+    </div>
+
+    <!-- Topics Grid -->
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Đang tải topics...</p>
+    </div>
+    } @else {
+    <div class="topics-grid">
+        @for (topic of filteredTopics(); track topic.id) {
+        <a [routerLink]="['/topics', topic.id]" class="topic-card animate-fade-in">
+            <div class="topic-header">
+                <span class="topic-icon">{{ topic.icon }}</span>
+                <span class="topic-month">Tháng {{ topic.month }}</span>
+            </div>
+
+            <h3 class="topic-name">{{ topic.name }}</h3>
+            <p class="topic-description">{{ topic.description }}</p>
+
+            <div class="topic-meta">
+                <span class="meta-item">
+                    <span class="material-icons-outlined">schedule</span>
+                    {{ topic.estimatedDays }} ngày
+                </span>
+                <span class="meta-item">
+                    <span class="material-icons-outlined">checklist</span>
+                    {{ topic.completedSubtopics }}/{{ topic.totalSubtopics }}
+                </span>
+            </div>
+
+            <div class="topic-progress">
+                <div class="progress" [class.progress--success]="topic.progressPercentage === 100">
+                    <div class="progress__bar" [style.width.%]="topic.progressPercentage"></div>
+                </div>
+                <span class="progress-label">{{ topic.progressPercentage }}%</span>
+            </div>
+        </a>
+        }
+    </div>
+    }
+</div>

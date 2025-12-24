@@ -1,0 +1,128 @@
+<div class="topic-detail">
+    @if (loading()) {
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Đang tải...</p>
+    </div>
+    } @else if (topic()) {
+    <!-- Topic Header -->
+    <header class="topic-header">
+        <button class="btn btn--ghost btn--icon" (click)="goBack()">
+            <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        <div class="topic-header__info">
+            <span class="topic-icon">{{ topic()!.icon }}</span>
+            <div>
+                <h1>{{ topic()!.name }}</h1>
+                <p class="topic-description">{{ topic()!.description }}</p>
+            </div>
+        </div>
+        <div class="topic-meta">
+            <span class="badge badge--medium">Tháng {{ topic()!.month }}</span>
+            <span class="meta-item">
+                <span class="material-icons-outlined">schedule</span>
+                {{ topic()!.estimatedDays }} ngày
+            </span>
+        </div>
+    </header>
+
+    <!-- Progress Overview -->
+    <section class="progress-section">
+        <div class="progress-card">
+            <div class="progress-card__header">
+                <h3>Tiến độ</h3>
+                <span class="progress-percentage">{{ topic()!.progressPercentage }}%</span>
+            </div>
+            <div class="progress progress--lg">
+                <div class="progress__bar" [class.progress--success]="topic()!.progressPercentage === 100"
+                    [style.width.%]="topic()!.progressPercentage"></div>
+            </div>
+            <div class="progress-stats">
+                <span>{{ topic()!.completedSubtopics }}/{{ topic()!.totalSubtopics }} subtopics hoàn thành</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subtopics List -->
+    <section class="subtopics-section">
+        <h2 class="section-title">
+            Danh sách Subtopics ({{ topic()!.totalSubtopics }})
+        </h2>
+
+        <div class="subtopics-list">
+            @for (subtopic of topic()!.subtopics; track subtopic.id) {
+            <div class="subtopic-card" [class.completed]="subtopic.status === 'COMPLETED'">
+                <div class="subtopic-header">
+                    <div class="subtopic-info">
+                        <h3>{{ subtopic.name }}</h3>
+                        <p>{{ subtopic.description }}</p>
+                    </div>
+                    <div class="subtopic-meta">
+                        <!-- Difficulty -->
+                        <div class="difficulty" [title]="'Độ khó: ' + subtopic.difficulty + '/5'">
+                            @for (star of [1,2,3,4,5]; track star) {
+                            <span class="difficulty__star"
+                                [class.difficulty__star--filled]="star <= subtopic.difficulty">★</span>
+                            }
+                        </div>
+                        <!-- Priority -->
+                        <span class="badge" [class.badge--low]="subtopic.priority === 'LOW'"
+                            [class.badge--medium]="subtopic.priority === 'MEDIUM'"
+                            [class.badge--high]="subtopic.priority === 'HIGH'"
+                            [class.badge--critical]="subtopic.priority === 'CRITICAL'">
+                            {{ subtopic.priority }}
+                        </span>
+                        <!-- Duration -->
+                        <span class="meta-item">
+                            <span class="material-icons-outlined">schedule</span>
+                            {{ subtopic.estimatedDays }}d
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="subtopic-progress">
+                    <div class="progress">
+                        <div class="progress__bar" [class.progress--success]="subtopic.completionPercentage === 100"
+                            [style.width.%]="subtopic.completionPercentage"></div>
+                    </div>
+                    <span class="progress-text">{{ subtopic.completionPercentage }}%</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="subtopic-actions">
+                    @if (subtopic.status === 'NOT_STARTED') {
+                    <button class="btn btn--primary btn--sm" (click)="updateStatus(subtopic.id, 'IN_PROGRESS')">
+                        <span class="material-icons-outlined">play_arrow</span>
+                        Bắt đầu
+                    </button>
+                    } @else if (subtopic.status === 'IN_PROGRESS') {
+                    <button class="btn btn--success btn--sm" (click)="updateStatus(subtopic.id, 'COMPLETED')">
+                        <span class="material-icons-outlined">check</span>
+                        Hoàn thành
+                    </button>
+                    <button class="btn btn--ghost btn--sm" (click)="updateStatus(subtopic.id, 'NOT_STARTED')">
+                        Reset
+                    </button>
+                    } @else {
+                    <span class="completion-badge">
+                        <span class="material-icons-outlined">check_circle</span>
+                        Đã hoàn thành
+                    </span>
+                    <button class="btn btn--ghost btn--sm" (click)="updateStatus(subtopic.id, 'NOT_STARTED')">
+                        Reset
+                    </button>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </section>
+    } @else {
+    <div class="error">
+        <span class="material-icons-outlined">error</span>
+        <p>Không tìm thấy topic</p>
+        <button class="btn btn--primary" (click)="goBack()">Quay lại</button>
+    </div>
+    }
+</div>

@@ -1,0 +1,87 @@
+<div class="quiz-start">
+    <header class="page-header">
+        <h1>Quiz Practice</h1>
+        <p>Luyện tập với câu hỏi tương tự đề thi thực tế</p>
+    </header>
+
+    <!-- Quiz Modes -->
+    <div class="mode-grid">
+        <div class="mode-card" (click)="selectMode('quick')">
+            <span class="mode-icon">⚡</span>
+            <h3>Quick Quiz</h3>
+            <p>10 câu ngẫu nhiên, không giới hạn thời gian</p>
+        </div>
+
+        <div class="mode-card" (click)="selectMode('topic')">
+            <span class="mode-icon">📚</span>
+            <h3>Quiz theo Topic</h3>
+            <p>Chọn topic bạn muốn luyện tập</p>
+        </div>
+
+        <div class="mode-card mode-card--premium" (click)="selectMode('mock')">
+            <span class="mode-icon">🎯</span>
+            <h3>Mock Exam</h3>
+            <p>50 câu, 90 phút - giống đề thi thật</p>
+            <span class="premium-badge">Đề xuất</span>
+        </div>
+    </div>
+
+    <!-- Recent Scores -->
+    <section class="recent-section">
+        <h2 class="section-title">Lịch sử gần đây</h2>
+        <div class="history-list">
+            @for (item of history(); track item.date) {
+            <div class="history-item">
+                <div class="history-info">
+                    <span class="history-type">{{ item.type }}</span>
+                    <span class="history-date">{{ item.date }}</span>
+                </div>
+                <div class="history-score" [class.pass]="item.score >= 68">
+                    {{ item.score }}%
+                </div>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- Topic Selection Modal -->
+    @if (showTopicModal()) {
+    <div class="modal-overlay" (click)="closeTopicModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal__header">
+                <h2>Chọn Topic</h2>
+                <button class="btn btn--ghost btn--icon" (click)="closeTopicModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal__body">
+                @if (loadingTopics()) {
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Đang tải topics...</p>
+                </div>
+                } @else if (topics().length === 0) {
+                <div class="empty-state">
+                    <p>Không có topic nào</p>
+                </div>
+                } @else {
+                <div class="topic-grid">
+                    @for (topic of topics(); track topic.id) {
+                    <div class="topic-card" (click)="selectTopic(topic)">
+                        <h3>{{ topic.name }}</h3>
+                        @if (topic.description) {
+                        <p>{{ topic.description }}</p>
+                        }
+                        @if (topic.subtopicCount) {
+                        <span class="topic-count">{{ topic.subtopicCount }} subtopics</span>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div>

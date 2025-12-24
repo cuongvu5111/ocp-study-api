@@ -1,0 +1,236 @@
+<div class="flashcard-list">
+    <header class="page-header">
+        <div>
+            <h1>Flashcards</h1>
+            <p>Ôn tập với phương pháp Spaced Repetition</p>
+        </div>
+        <div class="header-actions">
+            <a routerLink="/flashcards/review" class="btn btn--primary">
+                <span class="material-icons-outlined">play_arrow</span>
+                Review ngay ({{ dueCount() }})
+            </a>
+            <button class="btn btn--secondary" (click)="openCreateModal()">
+                <span class="material-icons-outlined">add</span>
+                Tạo mới
+            </button>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-box">
+            <span class="stat-icon">📚</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ totalCards() }}</span>
+                <span class="stat-label">Tổng số</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon">⏰</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ dueCount() }}</span>
+                <span class="stat-label">Cần ôn</span>
+            </div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon">✅</span>
+            <div class="stat-info">
+                <span class="stat-value">{{ masteredCount() }}</span>
+                <span class="stat-label">Đã thuộc</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flashcards Grid -->
+    @if (loading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Đang tải flashcards...</p>
+    </div>
+    } @else if (flashcards().length === 0) {
+    <div class="empty-state">
+        <span class="material-icons-outlined">style</span>
+        <p>Chưa có flashcard nào</p>
+        <button class="btn btn--primary" (click)="openCreateModal()">
+            <span class="material-icons-outlined">add</span>
+            Tạo flashcard đầu tiên
+        </button>
+    </div>
+    } @else {
+    <div class="cards-grid">
+        @for (card of flashcards(); track card.id) {
+        <div class="flashcard-item" (click)="viewCard(card)">
+            <div class="card-topic">{{ card.topicName }}</div>
+            <div class="card-front">{{ card.front }}</div>
+            @if (card.codeExample) {
+            <div class="card-code">
+                <code>{{ card.codeExample.substring(0, 50) }}...</code>
+            </div>
+            }
+            <div class="card-meta">
+                <span title="Số lần review">
+                    <span class="material-icons-outlined">refresh</span>
+                    {{ card.reviewCount }}
+                </span>
+                <span title="Accuracy">
+                    <span class="material-icons-outlined">check_circle</span>
+                    {{ card.reviewCount > 0 ? Math.round(card.correctCount / card.reviewCount * 100) : 0 }}%
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- Detail Modal -->
+    @if (selectedCard()) {
+    <div class="modal-overlay" (click)="closeDetailModal()">
+        <div class="modal modal-detail" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <span class="card-topic-badge">{{ selectedCard()!.topicName }}</span>
+                    <h2>Chi tiết Flashcard</h2>
+                </div>
+                <button class="btn-close" (click)="closeDetailModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="detail-section">
+                    <h3>
+                        <span class="material-icons-outlined">help_outline</span>
+                        Câu hỏi
+                    </h3>
+                    <p class="detail-content">{{ selectedCard()!.front }}</p>
+                </div>
+
+                <div class="detail-section">
+                    <h3>
+                        <span class="material-icons-outlined">lightbulb</span>
+                        Câu trả lời
+                    </h3>
+                    <p class="detail-content">{{ selectedCard()!.back }}</p>
+                </div>
+
+                @if (selectedCard()!.codeExample) {
+                <div class="detail-section">
+                    <h3>
+                        <span class="material-icons-outlined">code</span>
+                        Code Example
+                    </h3>
+                    <pre class="code-block"><code>{{ selectedCard()!.codeExample }}</code></pre>
+                </div>
+                }
+
+                <div class="detail-stats">
+                    <div class="stat-item">
+                        <span class="material-icons-outlined">refresh</span>
+                        <span>{{ selectedCard()!.reviewCount }} lần review</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="material-icons-outlined">check_circle</span>
+                        <span>{{ selectedCard()!.correctCount }} lần đúng</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="material-icons-outlined">calendar_today</span>
+                        <span>{{ formatDate(selectedCard()!.createdAt) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn--ghost" (click)="closeDetailModal()">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- Create Modal -->
+    @if (showCreateModal()) {
+    <div class="modal-overlay" (click)="closeCreateModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Tạo Flashcard Mới</h2>
+                <button class="btn-close" (click)="closeCreateModal()">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form (ngSubmit)="submitFlashcard()" #flashcardForm="ngForm">
+                    <!-- Topic Selection -->
+                    <div class="form-group">
+                        <label for="topicId">
+                            Topic <span class="required">*</span>
+                        </label>
+                        <select id="topicId" name="topicId" [(ngModel)]="newFlashcard.topicId" required
+                            class="form-control">
+                            <option value="">-- Chọn topic --</option>
+                            @for (topic of topics(); track topic.id) {
+                            <option [value]="topic.id">{{ topic.icon }} {{ topic.name }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Front (Question) -->
+                    <div class="form-group">
+                        <label for="front">
+                            Câu hỏi (Front) <span class="required">*</span>
+                        </label>
+                        <textarea id="front" name="front" [(ngModel)]="newFlashcard.front" required rows="3"
+                            placeholder="VD: Functional Interface là gì?" class="form-control"></textarea>
+                    </div>
+
+                    <!-- Back (Answer) -->
+                    <div class="form-group">
+                        <label for="back">
+                            Câu trả lời (Back) <span class="required">*</span>
+                        </label>
+                        <textarea id="back" name="back" [(ngModel)]="newFlashcard.back" required rows="4"
+                            placeholder="VD: Interface chỉ có duy nhất 1 abstract method, có thể có @FunctionalInterface annotation"
+                            class="form-control"></textarea>
+                    </div>
+
+                    <!-- Code Example (Optional) -->
+                    <div class="form-group">
+                        <label for="codeExample">
+                            Code Example (Optional)
+                        </label>
+                        <textarea id="codeExample" name="codeExample" [(ngModel)]="newFlashcard.codeExample" rows="5"
+                            placeholder="@FunctionalInterface&#10;interface Calculator {&#10;  int calculate(int a, int b);&#10;}"
+                            class="form-control code-input"></textarea>
+                    </div>
+
+                    <!-- Error Message -->
+                    @if (errorMessage()) {
+                    <div class="error-box">
+                        <span class="material-icons-outlined">error</span>
+                        {{ errorMessage() }}
+                    </div>
+                    }
+
+                    <!-- Actions -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn--ghost" (click)="closeCreateModal()">
+                            Hủy
+                        </button>
+                        <button type="submit" class="btn btn--primary"
+                            [disabled]="!flashcardForm.valid || submitting()">
+                            @if (submitting()) {
+                            <span class="spinner-sm"></span>
+                            Đang lưu...
+                            } @else {
+                            <span class="material-icons-outlined">save</span>
+                            Lưu Flashcard
+                            }
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    }
+</div>

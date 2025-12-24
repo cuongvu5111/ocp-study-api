@@ -1,0 +1,137 @@
+<div class="dashboard">
+    <!-- Hero Section -->
+    <section class="dashboard__hero">
+        <div class="hero-content">
+            <h1>Chào mừng trở lại! 👋</h1>
+            <p>Tiếp tục hành trình chinh phục OCP Java SE 11</p>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-card stat-card--primary">
+                <span class="stat-value">{{ overallProgress() }}%</span>
+                <span class="stat-label">Hoàn thành</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ daysStreak() }}</span>
+                <span class="stat-label">Ngày streak</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">{{ flashcardsDue() }}</span>
+                <span class="stat-label">Cards cần ôn</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="dashboard__actions">
+        <h2 class="section-title">Bắt đầu ngay</h2>
+        <div class="action-grid">
+            <a routerLink="/flashcards/review" class="action-card action-card--review">
+                <span class="action-icon">🎴</span>
+                <div class="action-info">
+                    <h3>Review Flashcards</h3>
+                    <p>{{ flashcardsDue() }} cards đang chờ</p>
+                </div>
+                <span class="material-icons-outlined">arrow_forward</span>
+            </a>
+
+            <a routerLink="/quiz" class="action-card action-card--quiz">
+                <span class="action-icon">📝</span>
+                <div class="action-info">
+                    <h3>Làm Quiz</h3>
+                    <p>Kiểm tra kiến thức</p>
+                </div>
+                <span class="material-icons-outlined">arrow_forward</span>
+            </a>
+
+            <a routerLink="/topics" class="action-card action-card--study">
+                <span class="action-icon">📚</span>
+                <div class="action-info">
+                    <h3>Tiếp tục học</h3>
+                    <p>{{ currentTopic() }}</p>
+                </div>
+                <span class="material-icons-outlined">arrow_forward</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Progress by Month -->
+    <section class="dashboard__progress">
+        <h2 class="section-title">Tiến độ theo tháng</h2>
+        <div class="month-grid">
+            @for (month of months(); track month.number) {
+            <div class="month-card" [class.month-card--active]="month.isActive">
+                <div class="month-header">
+                    <span class="month-icon">{{ month.icon }}</span>
+                    <div class="month-info">
+                        <h3>Tháng {{ month.number }}</h3>
+                        <span class="month-phase">{{ month.phase }}</span>
+                    </div>
+                </div>
+                <div class="month-topics">
+                    @for (topic of month.topics; track topic) {
+                    <span class="topic-tag">{{ topic }}</span>
+                    }
+                </div>
+                <div class="month-progress">
+                    <div class="progress">
+                        <div class="progress__bar" [style.width.%]="month.progress"></div>
+                    </div>
+                    <span class="progress-text">{{ month.progress }}%</span>
+                </div>
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- Study Calendar (Heatmap) -->
+    <section class="dashboard__calendar">
+        <h2 class="section-title">Lịch học tập</h2>
+        <div class="calendar-container">
+            <div class="calendar-heatmap">
+                @for (day of calendarDays(); track $index) {
+                <div class="calendar-day" [class.has-activity]="day.hasActivity" [class.today]="day.isToday"
+                    [title]="day.date + ': ' + day.minutes + ' phút'"></div>
+                }
+            </div>
+            <div class="calendar-legend">
+                <span>Ít</span>
+                <div class="legend-scale">
+                    <div class="legend-item level-0"></div>
+                    <div class="legend-item level-1"></div>
+                    <div class="legend-item level-2"></div>
+                    <div class="legend-item level-3"></div>
+                    <div class="legend-item level-4"></div>
+                </div>
+                <span>Nhiều</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Exam Info -->
+    <section class="dashboard__exam">
+        <div class="exam-card">
+            <div class="exam-header">
+                <span class="material-icons-outlined">school</span>
+                <h2>Thông tin kỳ thi</h2>
+            </div>
+            <div class="exam-details">
+                <div class="exam-detail">
+                    <span class="detail-label">Exam Code</span>
+                    <span class="detail-value">1Z0-819</span>
+                </div>
+                <div class="exam-detail">
+                    <span class="detail-label">Thời gian</span>
+                    <span class="detail-value">90 phút</span>
+                </div>
+                <div class="exam-detail">
+                    <span class="detail-label">Số câu hỏi</span>
+                    <span class="detail-value">50 câu</span>
+                </div>
+                <div class="exam-detail">
+                    <span class="detail-label">Điểm đạt</span>
+                    <span class="detail-value highlight">68%</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

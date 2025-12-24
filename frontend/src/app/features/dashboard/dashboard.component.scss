@@ -1,0 +1,354 @@
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-6);
+    color: var(--color-text-primary);
+}
+
+// Hero Section
+.dashboard__hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-8);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    margin-bottom: var(--spacing-8);
+}
+
+.hero-content h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-2);
+}
+
+.hero-content p {
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+.hero-stats {
+    display: flex;
+    gap: var(--spacing-4);
+}
+
+.stat-card {
+    background-color: var(--color-bg-secondary);
+    padding: var(--spacing-5);
+    border-radius: var(--radius-xl);
+    text-align: center;
+    min-width: 120px;
+
+    &--primary {
+        background: var(--gradient-primary);
+    }
+}
+
+.stat-value {
+    display: block;
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+
+    .stat-card--primary & {
+        color: rgba(255, 255, 255, 0.8);
+    }
+}
+
+// Quick Actions
+.dashboard__actions {
+    margin-bottom: var(--spacing-8);
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-6);
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding: var(--spacing-5);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    text-decoration: none;
+    transition: all var(--transition-normal);
+
+    &:hover {
+        transform: translateY(-2px);
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-lg);
+    }
+
+    &--review {
+        border-left: 4px solid var(--color-primary);
+    }
+
+    &--quiz {
+        border-left: 4px solid var(--color-secondary);
+    }
+
+    &--study {
+        border-left: 4px solid var(--color-accent);
+    }
+}
+
+.action-icon {
+    font-size: 2.5rem;
+}
+
+.action-info {
+    flex: 1;
+
+    h3 {
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-1);
+    }
+
+    p {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        margin: 0;
+    }
+}
+
+.action-card .material-icons-outlined {
+    color: var(--color-text-muted);
+}
+
+// Progress by Month
+.dashboard__progress {
+    margin-bottom: var(--spacing-8);
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4);
+}
+
+.month-card {
+    padding: var(--spacing-5);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+
+    &--active {
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-glow);
+    }
+}
+
+.month-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+}
+
+.month-icon {
+    font-size: 1.5rem;
+}
+
+.month-info h3 {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-1);
+}
+
+.month-phase {
+    font-size: var(--font-size-xs);
+    color: var(--color-primary-light);
+}
+
+.month-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-4);
+}
+
+.topic-tag {
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-secondary);
+}
+
+.month-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+
+    .progress {
+        flex: 1;
+    }
+}
+
+.progress-text {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+// Calendar Heatmap
+.dashboard__calendar {
+    margin-bottom: var(--spacing-8);
+}
+
+.calendar-container {
+    padding: var(--spacing-6);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+}
+
+.calendar-heatmap {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: var(--spacing-4);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+
+    &.has-activity {
+        background-color: var(--color-primary);
+    }
+
+    &.today {
+        border: 2px solid var(--color-accent);
+    }
+}
+
+.calendar-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.legend-scale {
+    display: flex;
+    gap: 2px;
+}
+
+.legend-item {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+
+    &.level-0 {
+        background-color: var(--color-bg-tertiary);
+    }
+
+    &.level-1 {
+        background-color: rgba(99, 102, 241, 0.3);
+    }
+
+    &.level-2 {
+        background-color: rgba(99, 102, 241, 0.5);
+    }
+
+    &.level-3 {
+        background-color: rgba(99, 102, 241, 0.7);
+    }
+
+    &.level-4 {
+        background-color: var(--color-primary);
+    }
+}
+
+// Exam Info
+.dashboard__exam {
+    margin-bottom: var(--spacing-8);
+}
+
+.exam-card {
+    padding: var(--spacing-6);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+}
+
+.exam-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-6);
+
+    .material-icons-outlined {
+        font-size: 28px;
+        color: var(--color-accent);
+    }
+
+    h2 {
+        font-size: var(--font-size-xl);
+        margin: 0;
+    }
+}
+
+.exam-details {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-4);
+}
+
+.exam-detail {
+    text-align: center;
+    padding: var(--spacing-4);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+}
+
+.detail-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-2);
+}
+
+.detail-value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+
+    &.highlight {
+        color: var(--color-success);
+    }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+    .dashboard__hero {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-6);
+    }
+
+    .action-grid,
+    .month-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
