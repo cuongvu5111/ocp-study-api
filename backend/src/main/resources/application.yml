@@ -19,16 +19,16 @@ spring:
   # JPA/Hibernate Configuration
   jpa:
     hibernate:
-      ddl-auto: update  # Changed from validate to update - auto-create tables
+      ddl-auto: validate  # Changed to validate to use Flyway migrations
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
   
-  # Flyway Configuration (disabled - using Hibernate auto-update instead)
+  # Flyway Configuration - Enabled to populate topics and questions
   flyway:
-    enabled: false  # Disabled to use Hibernate ddl-auto
+    enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
   

@@ -21,13 +21,25 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <form (ngSubmit)="onRegister()" class="auth-form">
           <div class="form-group">
+            <label for="fullName">Họ và tên</label>
+            <input 
+              type="text" 
+              id="fullName" 
+              [(ngModel)]="fullName" 
+              name="fullName"
+              placeholder="Nhập họ và tên"
+              required
+            />
+          </div>
+
+          <div class="form-group">
             <label for="username">Tài khoản</label>
             <input 
               type="text" 
               id="username" 
               [(ngModel)]="username" 
               name="username"
-              placeholder="Chọn username"
+              placeholder="Nhập tài khoản"
               required
             />
           </div>
@@ -50,7 +62,7 @@ import { AuthService } from '../../../core/services/auth.service';
               id="password" 
               [(ngModel)]="password" 
               name="password"
-              placeholder="Chọn password (min 8 ký tự)"
+              placeholder="Nhập mật khẩu (min 8 ký tự)"
               required
             />
           </div>
@@ -205,6 +217,7 @@ export class RegisterComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  fullName = '';
   username = '';
   email = '';
   password = '';
@@ -227,7 +240,7 @@ export class RegisterComponent {
     this.error.set(null);
     this.success.set(null);
 
-    this.authService.register(this.username, this.password, this.email).subscribe({
+    this.authService.register(this.username, this.password, this.email, this.fullName).subscribe({
       next: (response) => {
         this.loading.set(false);
         if (response.token) {

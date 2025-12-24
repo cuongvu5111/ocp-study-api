@@ -3,16 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-
-export interface User {
-    username: string;
-    email: string;
-    role: string;
-}
+import { User } from '../../models';
 
 export interface AuthResponse {
     token: string;
     username: string;
+    fullName?: string;
     email: string;
     role: string;
     message: string;
@@ -67,9 +63,10 @@ export class AuthService {
     /**
      * Register - tạo tài khoản mới
      */
-    register(username: string, password: string, email: string): Observable<AuthResponse> {
-        return this.http.post<AuthResponse>(`${this.baseUrl}/auth/register`, {
+    register(username: string, password: string, email?: string, fullName?: string): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}/auth/register`, {
             username,
+            fullName,
             password,
             email
         }).pipe(
@@ -116,7 +113,9 @@ export class AuthService {
     private saveAuthData(response: AuthResponse): void {
         localStorage.setItem(this.tokenKey, response.token);
         const user: User = {
+            id: 0, // Will be set from backend
             username: response.username,
+            fullName: response.fullName,
             email: response.email,
             role: response.role
         };
