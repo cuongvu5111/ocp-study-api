@@ -39,12 +39,12 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Document> getDocumentsByCertification(Long certificationId) {
+    public List<Document> getDocumentsByCertification(UUID certificationId) {
         return documentRepository.findByCertificationIdOrderByUploadedAtDesc(certificationId);
     }
 
     @Transactional
-    public Document storeFile(MultipartFile file, Long certificationId, String title, String username) {
+    public Document storeFile(MultipartFile file, UUID certificationId, String title, String username) {
         // Validate file type
         if (!"application/pdf".equals(file.getContentType())) {
             throw new RuntimeException("Chỉ chấp nhận file PDF.");
@@ -91,7 +91,7 @@ public class DocumentService {
         }
     }
 
-    public Resource loadFileAsResource(Long documentId) {
+    public Resource loadFileAsResource(UUID documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found " + documentId));
 
@@ -109,7 +109,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public void deleteDocument(Long documentId) {
+    public void deleteDocument(UUID documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
 

@@ -2,6 +2,8 @@ package com.ocp.study.dto;
 
 import lombok.*;
 
+import java.util.UUID;
+
 /**
  * DTO cho Quiz submission request.
  * 
@@ -15,7 +17,7 @@ import lombok.*;
 public class QuizSubmissionDTO {
 
     private String quizType; // QUICK_QUIZ, TOPIC_QUIZ, MOCK_EXAM
-    private Long topicId; // Optional - for topic quiz
+    private UUID topicId; // Optional - for topic quiz
     private String topicName; // Optional - for display
     private Integer totalQuestions;
     private Integer correctAnswers;

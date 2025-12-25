@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/documents")
@@ -29,7 +30,7 @@ public class DocumentController {
 
     @GetMapping
     @Operation(summary = "Lấy danh sách tài liệu", description = "Lấy danh sách tài liệu của một chứng chỉ")
-    public ResponseEntity<List<Document>> getDocuments(@RequestParam Long certificationId) {
+    public ResponseEntity<List<Document>> getDocuments(@RequestParam UUID certificationId) {
         return ResponseEntity.ok(documentService.getDocumentsByCertification(certificationId));
     }
 
@@ -37,7 +38,7 @@ public class DocumentController {
     @Operation(summary = "Upload tài liệu", description = "Upload file PDF cho chứng chỉ")
     public ResponseEntity<Document> uploadDocument(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("certificationId") Long certificationId,
+            @RequestParam("certificationId") UUID certificationId,
             @RequestParam(value = "title", required = false) String title) {
 
         return ResponseEntity.ok(documentService.storeFile(file, certificationId, title, getUserId()));
@@ -45,7 +46,7 @@ public class DocumentController {
 
     @GetMapping("/{id}/file")
     @Operation(summary = "Xem tài liệu", description = "Tải hoặc xem file PDF")
-    public ResponseEntity<Resource> getFile(@PathVariable Long id) {
+    public ResponseEntity<Resource> getFile(@PathVariable UUID id) {
         Resource resource = documentService.loadFileAsResource(id);
 
         // Try to detect content type
@@ -59,7 +60,7 @@ public class DocumentController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa tài liệu")
-    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDocument(@PathVariable UUID id) {
         documentService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }

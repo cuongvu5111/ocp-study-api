@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +38,7 @@ public class TopicService {
         /**
          * Lấy tất cả topics với progress của user theo certificate
          */
-        public org.springframework.data.domain.Page<TopicDTO> getAllTopics(String userId, Long certificationId,
+        public org.springframework.data.domain.Page<TopicDTO> getAllTopics(String userId, UUID certificationId,
                         org.springframework.data.domain.Pageable pageable) {
                 org.springframework.data.domain.Page<Topic> topicsPage;
                 if (certificationId != null) {
@@ -50,7 +51,7 @@ public class TopicService {
                 List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
 
                 // Map progress theo subtopicId để lookup nhanh
-                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                Map<UUID, TopicProgress> progressMap = userProgress.stream()
                                 .collect(Collectors.toMap(
                                                 p -> p.getSubtopic().getId(),
                                                 p -> p,
@@ -62,14 +63,14 @@ public class TopicService {
         /**
          * Lấy topic theo ID với subtopics và progress
          */
-        public TopicDTO getTopicById(Long id, String userId) {
+        public TopicDTO getTopicById(UUID id, String userId) {
                 Topic topic = topicRepository.findByIdWithSubtopics(id);
                 if (topic == null) {
                         throw new RuntimeException("Topic không tồn tại: " + id);
                 }
 
                 List<TopicProgress> userProgress = progressRepository.findByUserIdAndTopicId(userId, id);
-                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                Map<UUID, TopicProgress> progressMap = userProgress.stream()
                                 .collect(Collectors.toMap(
                                                 p -> p.getSubtopic().getId(),
                                                 p -> p,
@@ -85,7 +86,7 @@ public class TopicService {
                 List<Topic> topics = topicRepository.findByMonthOrderByOrderIndexAsc(month);
                 List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
 
-                Map<Long, TopicProgress> progressMap = userProgress.stream()
+                Map<UUID, TopicProgress> progressMap = userProgress.stream()
                                 .collect(Collectors.toMap(
                                                 p -> p.getSubtopic().getId(),
                                                 p -> p,
@@ -99,7 +100,7 @@ public class TopicService {
         /**
          * Map Topic entity sang DTO với progress info
          */
-        private TopicDTO mapToDTO(Topic topic, Map<Long, TopicProgress> progressMap) {
+        private TopicDTO mapToDTO(Topic topic, Map<UUID, TopicProgress> progressMap) {
                 List<SubtopicDTO> subtopicDTOs = topic.getSubtopics().stream()
                                 .map(subtopic -> mapSubtopicToDTO(subtopic, progressMap.get(subtopic.getId())))
                                 .collect(Collectors.toList());
@@ -150,7 +151,7 @@ public class TopicService {
          * Tạo topic mới
          */
         @Transactional
-        public TopicDTO createTopic(com.ocp.study.dto.CreateTopicRequest request, Long certificationId) {
+        public TopicDTO createTopic(com.ocp.study.dto.CreateTopicRequest request, UUID certificationId) {
                 if (certificationId == null) {
                         throw new IllegalArgumentException("Certification ID is required");
                 }
@@ -203,7 +204,7 @@ public class TopicService {
          * Xóa topic
          */
         @Transactional
-        public void deleteTopic(Long id) {
+        public void deleteTopic(UUID id) {
                 if (!topicRepository.existsById(id)) {
                         throw new RuntimeException("Topic not found: " + id);
                 }

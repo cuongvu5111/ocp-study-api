@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -31,7 +32,7 @@ public class QuizService {
     /**
      * Lấy câu hỏi ngẫu nhiên cho quiz
      */
-    public List<QuestionDTO> getRandomQuestions(Long topicId, int limit) {
+    public List<QuestionDTO> getRandomQuestions(UUID topicId, int limit) {
         List<Question> questions;
 
         if (topicId != null) {
@@ -48,7 +49,7 @@ public class QuizService {
     /**
      * Lấy tất cả câu hỏi theo topic
      */
-    public List<QuestionDTO> getQuestionsByTopic(Long topicId) {
+    public List<QuestionDTO> getQuestionsByTopic(UUID topicId) {
         List<Question> questions = questionRepository.findByTopicIdWithOptions(topicId);
         return questions.stream()
                 .map(this::convertToDTO)

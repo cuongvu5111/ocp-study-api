@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -36,7 +37,7 @@ public class QuizController {
      */
     @GetMapping("/questions")
     public ResponseEntity<List<QuestionDTO>> getQuestions(
-            @RequestParam(required = false) Long topicId,
+            @RequestParam(required = false) UUID topicId,
             @RequestParam(defaultValue = "10") int limit) {
 
         List<QuestionDTO> questions = quizService.getRandomQuestions(topicId, limit);
@@ -47,7 +48,7 @@ public class QuizController {
      * GET /api/quiz/questions/topic/{topicId} - Lấy tất cả câu hỏi theo topic
      */
     @GetMapping("/questions/topic/{topicId}")
-    public ResponseEntity<List<QuestionDTO>> getQuestionsByTopic(@PathVariable Long topicId) {
+    public ResponseEntity<List<QuestionDTO>> getQuestionsByTopic(@PathVariable UUID topicId) {
         List<QuestionDTO> questions = quizService.getQuestionsByTopic(topicId);
         return ResponseEntity.ok(questions);
     }

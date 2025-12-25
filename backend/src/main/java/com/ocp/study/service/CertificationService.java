@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class CertificationService {
         return savedCert;
     }
 
-    public Object getCertificationById(Long id) {
+    public Object getCertificationById(UUID id) {
         Certification cert = certificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Certification not found"));
 
@@ -86,13 +87,13 @@ public class CertificationService {
         return response;
     }
 
-    private Certification getCertForUpdate(Long id) {
+    private Certification getCertForUpdate(UUID id) {
         return certificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Certification not found"));
     }
 
     @Transactional
-    public Certification updateCertification(Long id, com.ocp.study.dto.CreateCertificationRequest request) {
+    public Certification updateCertification(UUID id, com.ocp.study.dto.CreateCertificationRequest request) {
         Certification certification = getCertForUpdate(id);
         certification.setName(request.getName());
         certification.setCode(request.getCode());
@@ -102,7 +103,7 @@ public class CertificationService {
 
         if (request.getTopics() != null) {
             // Map existing topics by ID for easy lookup
-            java.util.Map<Long, com.ocp.study.entity.Topic> existingTopics = new java.util.HashMap<>();
+            java.util.Map<UUID, com.ocp.study.entity.Topic> existingTopics = new java.util.HashMap<>();
             for (com.ocp.study.entity.Topic t : certification.getTopics()) {
                 existingTopics.put(t.getId(), t);
             }
@@ -153,7 +154,7 @@ public class CertificationService {
     }
 
     @Transactional
-    public void deleteCertification(Long id) {
+    public void deleteCertification(UUID id) {
         if (!certificationRepository.existsById(id)) {
             throw new RuntimeException("Certification not found with id: " + id);
         }

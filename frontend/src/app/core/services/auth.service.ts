@@ -113,7 +113,7 @@ export class AuthService {
     private saveAuthData(response: AuthResponse): void {
         localStorage.setItem(this.tokenKey, response.token);
         const user: User = {
-            id: 0, // Will be set from backend
+            id: '', // Will be set from backend (UUID string)
             username: response.username,
             fullName: response.fullName,
             email: response.email,

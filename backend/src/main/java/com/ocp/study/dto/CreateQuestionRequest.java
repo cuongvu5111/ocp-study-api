@@ -2,13 +2,14 @@ package com.ocp.study.dto;
 
 import lombok.Data;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * DTO cho request tạo câu hỏi mới.
  */
 @Data
 public class CreateQuestionRequest {
-    private Long topicId;
+    private UUID topicId;
     private String content;
     private String codeSnippet;
     private String questionType;

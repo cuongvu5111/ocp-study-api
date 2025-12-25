@@ -2,7 +2,7 @@
  * Interface cho User.
  */
 export interface User {
-    id: number;
+    id: string;
     username: string;
     fullName?: string;
     email?: string;
@@ -13,7 +13,7 @@ export interface User {
  * Interface cho Topic từ API.
  */
 export interface Topic {
-    id: number;
+    id: string;
     name: string;
     description: string;
     icon: string;
@@ -30,8 +30,8 @@ export interface Topic {
  * Interface cho Subtopic.
  */
 export interface Subtopic {
-    id: number;
-    topicId: number;
+    id: string;
+    topicId: string;
     name: string;
     description: string;
     difficulty: number;
@@ -46,10 +46,10 @@ export interface Subtopic {
  * Interface cho Flashcard.
  */
 export interface Flashcard {
-    id: number;
-    topicId: number;
+    id: string;
+    topicId: string;
     topicName: string;
-    subtopicId?: number;
+    subtopicId?: string;
     subtopicName?: string;
     front: string;
     back: string;
@@ -64,8 +64,8 @@ export interface Flashcard {
  * Interface cho Question (Quiz).
  */
 export interface Question {
-    id: number;
-    topicId: number;
+    id: string;
+    topicId: string;
     topicName: string;
     content: string;
     codeSnippet?: string;
@@ -76,7 +76,7 @@ export interface Question {
 }
 
 export interface QuestionOption {
-    id: number;
+    id: string;
     optionKey: string;
     content: string;
     isCorrect?: boolean;
@@ -115,7 +115,7 @@ export interface StudyDay {
  * Interface cho Quiz submission.
  */
 export interface QuizAnswer {
-    questionId: number;
+    questionId: string;
     selectedOptions: string[];
 }
 
@@ -127,10 +127,11 @@ export interface QuizResult {
 }
 
 export interface QuestionResult {
-    questionId: number;
+    questionId: string;
     questionContent: string;
     selectedOptions: string[];
     correctOptions: string[];
     isCorrect: boolean;
     explanation: string;
 }
+

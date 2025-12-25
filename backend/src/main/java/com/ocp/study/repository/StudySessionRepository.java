@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository cho StudySession entity.
@@ -16,7 +17,7 @@ import java.util.Optional;
  * @since 1.0.0
  */
 @Repository
-public interface StudySessionRepository extends JpaRepository<StudySession, Long> {
+public interface StudySessionRepository extends JpaRepository<StudySession, UUID> {
 
     /**
      * Lấy session theo user và ngày

@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/certifications")
@@ -27,7 +27,7 @@ public class CertificationController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Lấy chi tiết chứng chỉ", description = "Trả về thông tin chi tiết của một chứng chỉ bao gồm topics")
-    public ResponseEntity<Object> getCertificationById(@PathVariable Long id) {
+    public ResponseEntity<Object> getCertificationById(@PathVariable UUID id) {
         return ResponseEntity.ok(certificationService.getCertificationById(id));
     }
 
@@ -41,14 +41,14 @@ public class CertificationController {
     @PutMapping("/{id}")
     @Operation(summary = "Cập nhật chứng chỉ", description = "Cập nhật thông tin chứng chỉ và topics")
     public ResponseEntity<Certification> updateCertification(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody com.ocp.study.dto.CreateCertificationRequest request) {
         return ResponseEntity.ok(certificationService.updateCertification(id, request));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa chứng chỉ", description = "Xóa chứng chỉ và tất cả dữ liệu liên quan")
-    public ResponseEntity<Void> deleteCertification(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCertification(@PathVariable UUID id) {
         certificationService.deleteCertification(id);
         return ResponseEntity.ok().build();
     }

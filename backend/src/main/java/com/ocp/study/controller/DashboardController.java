@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 /**
  * REST Controller cho Dashboard API.
  * 
@@ -27,7 +29,7 @@ public class DashboardController {
     @Operation(summary = "Lấy dữ liệu dashboard", description = "Trả về tổng quan tiến độ, streak, flashcards due, etc.")
     public ResponseEntity<DashboardDTO> getDashboard(
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId,
-            @RequestParam(required = false) Long certificationId) {
+            @RequestParam(required = false) UUID certificationId) {
         return ResponseEntity.ok(dashboardService.getDashboard(userId, certificationId));
     }
 

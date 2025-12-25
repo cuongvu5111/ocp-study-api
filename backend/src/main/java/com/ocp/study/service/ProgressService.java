@@ -1,7 +1,6 @@
 package com.ocp.study.service;
 
 import com.ocp.study.entity.Subtopic;
-import com.ocp.study.entity.Topic;
 import com.ocp.study.entity.TopicProgress;
 import com.ocp.study.repository.SubtopicRepository;
 import com.ocp.study.repository.TopicProgressRepository;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Service xử lý logic cho Topic Progress tracking.
@@ -31,7 +31,7 @@ public class ProgressService {
      * Cập nhật trạng thái học của subtopic
      */
     @Transactional
-    public TopicProgress updateProgress(String userId, Long subtopicId, TopicProgress.Status status) {
+    public TopicProgress updateProgress(String userId, UUID subtopicId, TopicProgress.Status status) {
         Subtopic subtopic = subtopicRepository.findById(subtopicId)
                 .orElseThrow(() -> new RuntimeException("Subtopic không tồn tại: " + subtopicId));
 
@@ -58,7 +58,7 @@ public class ProgressService {
      * Cập nhật % hoàn thành
      */
     @Transactional
-    public TopicProgress updateCompletionPercentage(String userId, Long subtopicId, Integer percentage) {
+    public TopicProgress updateCompletionPercentage(String userId, UUID subtopicId, Integer percentage) {
         TopicProgress progress = progressRepository.findByUserIdAndSubtopicId(userId, subtopicId)
                 .orElseThrow(() -> new RuntimeException("Progress không tồn tại"));
 
@@ -81,7 +81,7 @@ public class ProgressService {
      * Thêm ghi chú cho subtopic
      */
     @Transactional
-    public TopicProgress addNote(String userId, Long subtopicId, String note) {
+    public TopicProgress addNote(String userId, UUID subtopicId, String note) {
         Subtopic subtopic = subtopicRepository.findById(subtopicId)
                 .orElseThrow(() -> new RuntimeException("Subtopic không tồn tại: " + subtopicId));
 

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * REST Controller cho Topics API.
@@ -31,7 +32,7 @@ public class TopicController {
     @Operation(summary = "Lấy tất cả topics", description = "Trả về danh sách tất cả topics với progress, lọc theo certificationId (có phân trang)")
     public ResponseEntity<org.springframework.data.domain.Page<TopicDTO>> getAllTopics(
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId,
-            @RequestParam(required = false) Long certificationId,
+            @RequestParam(required = false) UUID certificationId,
             org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(topicService.getAllTopics(userId, certificationId, pageable));
     }
@@ -39,7 +40,7 @@ public class TopicController {
     @GetMapping("/{id}")
     @Operation(summary = "Lấy topic theo ID", description = "Trả về chi tiết topic với subtopics")
     public ResponseEntity<TopicDTO> getTopicById(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
         return ResponseEntity.ok(topicService.getTopicById(id, userId));
     }
@@ -55,7 +56,7 @@ public class TopicController {
     @PostMapping
     @Operation(summary = "Tạo topic mới")
     public ResponseEntity<TopicDTO> createTopic(@RequestBody com.ocp.study.dto.CreateTopicRequest request,
-            @RequestParam Long certificationId) {
+            @RequestParam UUID certificationId) {
         // Note: The frontend sends { certificationId, name... } in body.
         // We need to adjust parameters or DTO handling.
         // If frontend sends: { "certificationId": 1, "name": "..." }
@@ -84,7 +85,7 @@ public class TopicController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Xóa topic")
-    public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTopic(@PathVariable UUID id) {
         topicService.deleteTopic(id);
         return ResponseEntity.noContent().build();
     }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository cho QuizHistory entity.
@@ -14,7 +15,7 @@ import java.util.List;
  * @since 1.0.0
  */
 @Repository
-public interface QuizHistoryRepository extends JpaRepository<QuizHistory, Long> {
+public interface QuizHistoryRepository extends JpaRepository<QuizHistory, UUID> {
 
     /**
      * Lấy lịch sử quiz của user, sắp xếp mới nhất trước

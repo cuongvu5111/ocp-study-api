@@ -68,7 +68,7 @@ public class QuestionAdminController {
      * GET /admin/questions/{id} - Lấy chi tiết câu hỏi theo ID
      */
     @GetMapping("/questions/{id}")
-    public ResponseEntity<Map<String, Object>> getQuestionById(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getQuestionById(@PathVariable UUID id) {
         Question question = questionRepository.findById(id).orElse(null);
         if (question == null) {
             return ResponseEntity.notFound().build();
@@ -146,7 +146,7 @@ public class QuestionAdminController {
      */
     @PutMapping("/questions/{id}")
     public ResponseEntity<Map<String, Object>> updateQuestion(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody CreateQuestionRequest request) {
 
         Question question = questionRepository.findById(id).orElse(null);
@@ -170,7 +170,7 @@ public class QuestionAdminController {
      * DELETE /admin/questions/{id} - Xóa câu hỏi
      */
     @DeleteMapping("/questions/{id}")
-    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteQuestion(@PathVariable UUID id) {
         if (!questionRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -222,7 +222,7 @@ public class QuestionAdminController {
                     }
 
                     // Parse values
-                    Long topicId = Long.parseLong(values.get(0).trim());
+                    UUID topicId = UUID.fromString(values.get(0).trim());
                     String content = values.get(1);
                     String codeSnippet = values.get(2);
                     String questionType = values.get(3);

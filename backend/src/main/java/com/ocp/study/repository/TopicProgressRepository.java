@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository cho TopicProgress entity.
@@ -15,12 +16,12 @@ import java.util.Optional;
  * @since 1.0.0
  */
 @Repository
-public interface TopicProgressRepository extends JpaRepository<TopicProgress, Long> {
+public interface TopicProgressRepository extends JpaRepository<TopicProgress, UUID> {
 
     /**
      * Lấy progress theo user và subtopic
      */
-    Optional<TopicProgress> findByUserIdAndSubtopicId(String userId, Long subtopicId);
+    Optional<TopicProgress> findByUserIdAndSubtopicId(String userId, UUID subtopicId);
 
     /**
      * Lấy tất cả progress của user
@@ -30,7 +31,7 @@ public interface TopicProgressRepository extends JpaRepository<TopicProgress, Lo
     /**
      * Lấy progress theo user và topic
      */
-    List<TopicProgress> findByUserIdAndTopicId(String userId, Long topicId);
+    List<TopicProgress> findByUserIdAndTopicId(String userId, UUID topicId);
 
     /**
      * Đếm số subtopics đã hoàn thành theo user
@@ -42,7 +43,7 @@ public interface TopicProgressRepository extends JpaRepository<TopicProgress, Lo
      * Đếm số subtopics đã hoàn thành theo user và topic
      */
     @Query("SELECT COUNT(p) FROM TopicProgress p WHERE p.userId = :userId AND p.topic.id = :topicId AND p.status = 'COMPLETED'")
-    long countCompletedByUserIdAndTopicId(String userId, Long topicId);
+    long countCompletedByUserIdAndTopicId(String userId, UUID topicId);
 
     /**
      * Tính % hoàn thành tổng thể
@@ -54,11 +55,11 @@ public interface TopicProgressRepository extends JpaRepository<TopicProgress, Lo
      * Đếm số subtopics đã hoàn thành theo user và certification
      */
     @Query("SELECT COUNT(p) FROM TopicProgress p WHERE p.userId = :userId AND p.topic.certification.id = :certificationId AND p.status = 'COMPLETED'")
-    long countCompletedByUserIdAndCertificationId(String userId, Long certificationId);
+    long countCompletedByUserIdAndCertificationId(String userId, UUID certificationId);
 
     /**
      * Tính % hoàn thành tổng thể theo certification
      */
     @Query("SELECT COALESCE(AVG(p.completionPercentage), 0) FROM TopicProgress p WHERE p.userId = :userId AND p.topic.certification.id = :certificationId")
-    Double getAverageCompletionByUserIdAndCertificationId(String userId, Long certificationId);
+    Double getAverageCompletionByUserIdAndCertificationId(String userId, UUID certificationId);
 }

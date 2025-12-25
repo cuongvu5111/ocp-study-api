@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * REST Controller cho Progress API.
@@ -28,7 +29,7 @@ public class ProgressController {
     @PostMapping("/subtopic/{subtopicId}/status")
     @Operation(summary = "Cập nhật trạng thái học subtopic")
     public ResponseEntity<?> updateStatus(
-            @PathVariable Long subtopicId,
+            @PathVariable UUID subtopicId,
             @RequestParam TopicProgress.Status status,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
         progressService.updateProgress(userId, subtopicId, status);
@@ -38,7 +39,7 @@ public class ProgressController {
     @PostMapping("/subtopic/{subtopicId}/percentage")
     @Operation(summary = "Cập nhật % hoàn thành subtopic")
     public ResponseEntity<TopicProgress> updatePercentage(
-            @PathVariable Long subtopicId,
+            @PathVariable UUID subtopicId,
             @RequestParam Integer percentage,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
         return ResponseEntity.ok(progressService.updateCompletionPercentage(userId, subtopicId, percentage));
@@ -47,7 +48,7 @@ public class ProgressController {
     @PostMapping("/subtopic/{subtopicId}/note")
     @Operation(summary = "Thêm ghi chú cho subtopic")
     public ResponseEntity<TopicProgress> addNote(
-            @PathVariable Long subtopicId,
+            @PathVariable UUID subtopicId,
             @RequestBody String note,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
         return ResponseEntity.ok(progressService.addNote(userId, subtopicId, note));

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +40,7 @@ public class DashboardService {
         /**
          * Lấy dữ liệu dashboard cho user, có thể lọc theo certificationId
          */
-        public DashboardDTO getDashboard(String userId, Long certificationId) {
+        public DashboardDTO getDashboard(String userId, UUID certificationId) {
                 long totalTopics;
                 long totalSubtopics;
                 long completedSubtopics;
