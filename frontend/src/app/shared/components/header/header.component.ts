@@ -1,6 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { StreakBadgeComponent } from '../streak-badge/streak-badge.component';
+import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 
 /**
  * Header component.
@@ -9,7 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StreakBadgeComponent, NotificationDropdownComponent],
   template: `
     <header class="header">
       <div class="header__left">
@@ -33,18 +35,10 @@ import { AuthService } from '../../../core/services/auth.service';
       
       <div class="header__right">
         <!-- Streak Badge -->
-        <div class="streak-badge" title="Study streak">
-          <span class="material-icons-outlined">local_fire_department</span>
-          <span class="streak-count">{{ streak() }}</span>
-        </div>
+        <app-streak-badge></app-streak-badge>
         
         <!-- Notifications -->
-        <button class="btn btn--ghost btn--icon" title="Thông báo">
-          <span class="material-icons-outlined">notifications</span>
-          @if (notifications() > 0) {
-            <span class="notification-badge">{{ notifications() }}</span>
-          }
-        </button>
+        <app-notification-dropdown></app-notification-dropdown>
         
         <!-- User Dropdown -->
         <div class="user-dropdown">
@@ -343,8 +337,6 @@ export class HeaderComponent {
   authService = inject(AuthService);
 
   pageTitle = signal('Dashboard');
-  streak = signal(5);
-  notifications = signal(3);
   isDropdownOpen = signal(false);
 
   toggleDropdown() {

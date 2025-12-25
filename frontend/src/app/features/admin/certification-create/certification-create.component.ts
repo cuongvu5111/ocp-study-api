@@ -182,6 +182,7 @@ export class CertificationCreateComponent implements OnInit {
 
   form = this.fb.group({
     name: ['', Validators.required],
+    code: ['', Validators.required],
     description: ['', Validators.required],
     icon: ['school', Validators.required],
     durationMonths: [6, [Validators.required, Validators.min(1), Validators.max(12)]],
@@ -241,6 +242,7 @@ export class CertificationCreateComponent implements OnInit {
       next: (cert: any) => { // Use specific type if available
         this.form.patchValue({
           name: cert.name,
+          code: cert.code || '',
           description: cert.description,
           icon: cert.icon || 'school',
           durationMonths: cert.durationMonths || 6,

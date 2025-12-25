@@ -51,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/dashboard/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/progress/**").permitAll()
                         .requestMatchers("/quiz/submit", "/quiz/history").permitAll()
+                        .requestMatchers("/streak/**").permitAll()
+                        .requestMatchers("/notifications/**").permitAll()
                         // Admin only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // All other requests need authentication

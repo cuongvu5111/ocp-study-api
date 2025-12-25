@@ -42,6 +42,24 @@ public interface StudySessionRepository extends JpaRepository<StudySession, UUID
     Long getTotalMinutesStudied(String userId);
 
     /**
+     * Lấy ngày học cuối cùng của user
+     */
+    @Query("SELECT MAX(s.studyDate) FROM StudySession s WHERE s.userId = :userId")
+    Optional<LocalDate> findLastStudyDate(String userId);
+
+    /**
+     * Tính tổng phút học trong một ngày cụ thể
+     */
+    @Query("SELECT COALESCE(SUM(s.minutesStudied), 0) FROM StudySession s WHERE s.userId = :userId AND s.studyDate = :date")
+    Integer getTotalMinutesForDate(String userId, LocalDate date);
+
+    /**
+     * Lấy sessions từ một ngày nhất định trở về trước (để tính streak)
+     */
+    @Query("SELECT s FROM StudySession s WHERE s.userId = :userId AND s.studyDate >= :fromDate ORDER BY s.studyDate DESC")
+    List<StudySession> findByUserIdFromDate(String userId, LocalDate fromDate);
+
+    /**
      * Tính streak hiện tại (số ngày liên tiếp có học)
      */
     @Query(value = """

@@ -1,26 +1,12 @@
--- Flyway Migration: Fresh UUID Migration
--- Version: V8
--- Mô tả: Drop và tạo lại tất cả tables với UUID làm primary key (Fresh Start)
--- CẢNH BÁO: Migration này sẽ XÓA TẤT CẢ DỮ LIỆU HIỆN TẠI
+-- Flyway Migration: Initial Schema with UUID
+-- Version: V1
+-- Description: Tạo tất cả tables với UUID làm primary key
+-- Author: OCP Study Team
+-- Created: 2024-12-25
 
--- Yêu cầu extension uuid-ossp hoặc pgcrypto cho gen_random_uuid()
 -- PostgreSQL 13+ đã có sẵn gen_random_uuid() trong core
 
--- 1. Drop tất cả tables theo thứ tự phụ thuộc (foreign keys)
-DROP TABLE IF EXISTS quiz_history CASCADE;
-DROP TABLE IF EXISTS flashcard_reviews CASCADE;
-DROP TABLE IF EXISTS topic_progress CASCADE;
-DROP TABLE IF EXISTS study_sessions CASCADE;
-DROP TABLE IF EXISTS question_options CASCADE;
-DROP TABLE IF EXISTS questions CASCADE;
-DROP TABLE IF EXISTS flashcards CASCADE;
-DROP TABLE IF EXISTS subtopics CASCADE;
-DROP TABLE IF EXISTS documents CASCADE;
-DROP TABLE IF EXISTS topics CASCADE;
-DROP TABLE IF EXISTS certifications CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
--- 2. Tạo bảng Users với UUID
+-- 1. Users
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -34,7 +20,7 @@ CREATE TABLE users (
     daily_digest_enabled BOOLEAN DEFAULT TRUE
 );
 
--- 3. Tạo bảng Certifications với UUID
+-- 2. Certifications
 CREATE TABLE certifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
@@ -46,7 +32,7 @@ CREATE TABLE certifications (
     duration_months INTEGER
 );
 
--- 4. Tạo bảng Topics với UUID
+-- 3. Topics
 CREATE TABLE topics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     certification_id UUID NOT NULL REFERENCES certifications(id) ON DELETE CASCADE,
@@ -58,7 +44,7 @@ CREATE TABLE topics (
     estimated_days INTEGER
 );
 
--- 5. Tạo bảng Subtopics với UUID
+-- 4. Subtopics
 CREATE TABLE subtopics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -70,7 +56,7 @@ CREATE TABLE subtopics (
     order_index INTEGER NOT NULL
 );
 
--- 6. Tạo bảng Flashcards với UUID
+-- 5. Flashcards
 CREATE TABLE flashcards (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -85,7 +71,7 @@ CREATE TABLE flashcards (
     updated_at TIMESTAMP
 );
 
--- 7. Tạo bảng Questions với UUID
+-- 6. Questions
 CREATE TABLE questions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
@@ -96,7 +82,7 @@ CREATE TABLE questions (
     difficulty INTEGER NOT NULL DEFAULT 3
 );
 
--- 8. Tạo bảng Question Options với UUID
+-- 7. Question Options
 CREATE TABLE question_options (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
@@ -105,10 +91,10 @@ CREATE TABLE question_options (
     is_correct BOOLEAN NOT NULL DEFAULT FALSE
 );
 
--- 9. Tạo bảng Topic Progress với UUID
+-- 8. Topic Progress
 CREATE TABLE topic_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL,
     topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
     subtopic_id UUID NOT NULL REFERENCES subtopics(id) ON DELETE CASCADE,
     status VARCHAR(20) NOT NULL DEFAULT 'NOT_STARTED',
@@ -119,10 +105,10 @@ CREATE TABLE topic_progress (
     UNIQUE(user_id, subtopic_id)
 );
 
--- 10. Tạo bảng Study Sessions với UUID
+-- 9. Study Sessions
 CREATE TABLE study_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(255) NOT NULL,
     study_date DATE NOT NULL,
     minutes_studied INTEGER NOT NULL DEFAULT 0,
     flashcards_reviewed INTEGER DEFAULT 0,
@@ -131,32 +117,35 @@ CREATE TABLE study_sessions (
     UNIQUE(user_id, study_date)
 );
 
--- 11. Tạo bảng Flashcard Reviews với UUID
+-- 10. Flashcard Reviews
 CREATE TABLE flashcard_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     flashcard_id UUID NOT NULL REFERENCES flashcards(id) ON DELETE CASCADE,
     review_count INTEGER DEFAULT 0,
     correct_count INTEGER DEFAULT 0,
-    ease_factor DECIMAL(4,2) DEFAULT 2.5,
-    interval_days INTEGER DEFAULT 1,
+    difficulty_level INTEGER DEFAULT 3,
     next_review TIMESTAMP,
     last_reviewed TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, flashcard_id)
 );
 
--- 12. Tạo bảng Quiz History với UUID
+-- 11. Quiz History
 CREATE TABLE quiz_history (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    topic_id UUID REFERENCES topics(id) ON DELETE SET NULL,
-    score INTEGER NOT NULL,
+    quiz_type VARCHAR(20) NOT NULL,
+    topic_id UUID,
+    topic_name VARCHAR(200),
     total_questions INTEGER NOT NULL,
-    percentage DECIMAL(5,2),
+    correct_answers INTEGER NOT NULL,
+    score_percentage INTEGER NOT NULL,
+    time_spent INTEGER,
     completed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 13. Tạo bảng Documents với UUID
+-- 12. Documents
 CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
@@ -168,7 +157,7 @@ CREATE TABLE documents (
     uploaded_by VARCHAR(50)
 );
 
--- 14. Tạo indexes
+-- Indexes
 CREATE INDEX idx_topics_certification_id ON topics(certification_id);
 CREATE INDEX idx_subtopics_topic_id ON subtopics(topic_id);
 CREATE INDEX idx_flashcards_topic_id ON flashcards(topic_id);

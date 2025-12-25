@@ -41,7 +41,9 @@ export class TopicListComponent implements OnInit {
     const certId = Number(localStorage.getItem('selectedCertificationId'));
     this.apiService.getTopics(certId || undefined).subscribe({
       next: (data) => {
-        this.topics.set(data);
+        // Handle both array and Page object response
+        const topics = Array.isArray(data) ? data : (data.content || []);
+        this.topics.set(topics);
         this.loading.set(false);
       },
       error: (err) => {
@@ -52,12 +54,16 @@ export class TopicListComponent implements OnInit {
   }
 
   completedTopics = () => {
-    return this.topics().filter(t => t.progressPercentage === 100).length;
+    const topics = this.topics();
+    if (!Array.isArray(topics)) return 0;
+    return topics.filter(t => t.progressPercentage === 100).length;
   };
 
   filteredTopics = () => {
     const month = this.selectedMonth();
-    if (month === 0) return this.topics();
-    return this.topics().filter(t => t.month === month);
+    const topics = this.topics();
+    if (!Array.isArray(topics)) return [];
+    if (month === 0) return topics;
+    return topics.filter(t => t.month === month);
   };
 }

@@ -218,7 +218,7 @@ export class TopicListComponent implements OnInit {
         return cert ? cert.name : 'Unknown';
     }
 
-    deleteTopic(id: number) {
+    deleteTopic(id: string) {
         if (confirm('Xóa topic này sẽ xóa hết câu hỏi và flashcard bên trong?')) {
             this.apiService.deleteTopic(id).subscribe(() => this.loadTopics());
         }

@@ -28,7 +28,7 @@ export class ApiService {
         return this.http.get<any>(url, { params });
     }
 
-    getTopicById(id: number): Observable<any> {
+    getTopicById(id: string): Observable<any> {
         return this.http.get<any>(`${this.baseUrl}/topics/${id}`);
     }
 
@@ -40,11 +40,11 @@ export class ApiService {
         return this.http.post<any>(`${this.baseUrl}/topics`, data);
     }
 
-    updateTopic(id: number, data: any): Observable<any> {
+    updateTopic(id: string, data: any): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/topics/${id}`, data);
     }
 
-    deleteTopic(id: number): Observable<void> {
+    deleteTopic(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/topics/${id}`);
     }
 
@@ -90,14 +90,14 @@ export class ApiService {
 
     // ==================== PROGRESS ====================
 
-    updateSubtopicStatus(subtopicId: number, status: string): Observable<any> {
+    updateSubtopicStatus(subtopicId: string, status: string): Observable<any> {
         return this.http.post<any>(
             `${this.baseUrl}/progress/subtopic/${subtopicId}/status?status=${status}`,
             {}
         );
     }
 
-    updateSubtopicPercentage(subtopicId: number, percentage: number): Observable<any> {
+    updateSubtopicPercentage(subtopicId: string, percentage: number): Observable<any> {
         return this.http.post<any>(
             `${this.baseUrl}/progress/subtopic/${subtopicId}/percentage?percentage=${percentage}`,
             {}

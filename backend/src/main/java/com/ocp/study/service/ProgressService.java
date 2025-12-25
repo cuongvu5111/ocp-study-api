@@ -6,6 +6,7 @@ import com.ocp.study.repository.SubtopicRepository;
 import com.ocp.study.repository.TopicProgressRepository;
 import com.ocp.study.repository.TopicRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,14 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class ProgressService {
 
     private final TopicProgressRepository progressRepository;
-    private final TopicRepository topicRepository;
     private final SubtopicRepository subtopicRepository;
+    private final TopicRepository topicRepository;
+    private final StreakService streakService;
 
     /**
      * Cập nhật trạng thái học của subtopic
@@ -51,7 +54,19 @@ public class ProgressService {
             progress.setCompletionPercentage(100);
         }
 
-        return progressRepository.save(progress);
+        TopicProgress saved = progressRepository.save(progress);
+        log.info("✅ Saved progress: userId={}, subtopicId={}, topicId={}, status={}",
+                userId, subtopicId, saved.getTopic().getId(), saved.getStatus());
+
+        // Record study activity để tính streak (estimate 5 phút cho mỗi lần update)
+        try {
+            streakService.recordStudyActivity(userId, 5, 0, 0);
+            log.info("Recorded study activity for user {} (update progress)", userId);
+        } catch (Exception e) {
+            log.warn("Failed to record study activity: {}", e.getMessage());
+        }
+
+        return saved;
     }
 
     /**
@@ -74,7 +89,16 @@ public class ProgressService {
             }
         }
 
-        return progressRepository.save(progress);
+        TopicProgress saved = progressRepository.save(progress);
+
+        // Record study activity
+        try {
+            streakService.recordStudyActivity(userId, 5, 0, 0);
+        } catch (Exception e) {
+            log.warn("Failed to record study activity: {}", e.getMessage());
+        }
+
+        return saved;
     }
 
     /**

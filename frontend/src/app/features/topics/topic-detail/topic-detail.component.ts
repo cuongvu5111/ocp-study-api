@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Topic {
-  id: number;
+  id: string;  // UUID
   name: string;
   description: string;
   icon: string;
@@ -17,7 +17,7 @@ interface Topic {
 }
 
 interface Subtopic {
-  id: number;
+  id: string;  // UUID
   name: string;
   description: string;
   difficulty: number;
@@ -46,11 +46,13 @@ export class TopicDetailComponent implements OnInit {
   loading = signal(true);
 
   ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.loadTopic(id);
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadTopic(id);
+    }
   }
 
-  loadTopic(id: number) {
+  loadTopic(id: string) {
     this.loading.set(true);
     this.apiService.getTopicById(id).subscribe({
       next: (data) => {
@@ -64,11 +66,11 @@ export class TopicDetailComponent implements OnInit {
     });
   }
 
-  updateStatus(subtopicId: number, status: string) {
+  updateStatus(subtopicId: string, status: string) {
     this.apiService.updateSubtopicStatus(subtopicId, status).subscribe({
       next: () => {
-        // Reload topic để cập nhật UI
-        const id = this.topic()?.id;
+        // Reload topic để cập nhật completedSubtopics count
+        const id = this.route.snapshot.paramMap.get('id');
         if (id) {
           this.loadTopic(id);
         }
