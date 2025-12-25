@@ -23,8 +23,11 @@ export class CertificationService {
 
     constructor(private http: HttpClient) { }
 
-    getAllCertifications(): Observable<Certification[]> {
-        return this.http.get<Certification[]>(this.apiUrl);
+    getAllCertifications(page?: number, size?: number): Observable<any> {
+        let params: any = {};
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+        return this.http.get<any>(this.apiUrl, { params });
     }
 
     getCertificationById(id: number): Observable<Certification> {

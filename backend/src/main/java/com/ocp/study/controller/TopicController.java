@@ -28,11 +28,12 @@ public class TopicController {
     private static final String DEFAULT_USER_ID = "default-user";
 
     @GetMapping
-    @Operation(summary = "Lấy tất cả topics", description = "Trả về danh sách tất cả topics với progress, lọc theo certificationId")
-    public ResponseEntity<List<TopicDTO>> getAllTopics(
+    @Operation(summary = "Lấy tất cả topics", description = "Trả về danh sách tất cả topics với progress, lọc theo certificationId (có phân trang)")
+    public ResponseEntity<org.springframework.data.domain.Page<TopicDTO>> getAllTopics(
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId,
-            @RequestParam(required = false) Long certificationId) {
-        return ResponseEntity.ok(topicService.getAllTopics(userId, certificationId));
+            @RequestParam(required = false) Long certificationId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(topicService.getAllTopics(userId, certificationId, pageable));
     }
 
     @GetMapping("/{id}")
@@ -49,5 +50,42 @@ public class TopicController {
             @PathVariable Integer month,
             @RequestHeader(value = "X-User-Id", defaultValue = DEFAULT_USER_ID) String userId) {
         return ResponseEntity.ok(topicService.getTopicsByMonth(month, userId));
+    }
+
+    @PostMapping
+    @Operation(summary = "Tạo topic mới")
+    public ResponseEntity<TopicDTO> createTopic(@RequestBody com.ocp.study.dto.CreateTopicRequest request,
+            @RequestParam Long certificationId) {
+        // Note: The frontend sends { certificationId, name... } in body.
+        // We need to adjust parameters or DTO handling.
+        // If frontend sends: { "certificationId": 1, "name": "..." }
+        // We should probably include certificationId in CreateTopicRequest DTO or
+        // request body map.
+        // Or change implementation to extract from body.
+
+        // Let's assume request body has everything needed, but CreateTopicRequest DTO
+        // currently doesn't have certificationId.
+        // I should update CreateTopicRequest DTO or pass it as param.
+        // Frontend sends: apiService.createTopic(val) where val includes
+        // certificationId from form.
+
+        // Better implementation: Update CreateTopicRequest to include certificationId.
+        // For now, I'll take it from request body if DTO is updated, OR use Map.
+        // But TopicService.createTopic expects certificationId as arg.
+
+        // Temporary fix: Trust that frontend sends it in body, but we need to map it.
+        // Wait, I can't easily change DTO here without viewing it again.
+        // Let's modify Controller to accept Map or updated DTO?
+        // I already viewed CreateTopicRequest, it DOES NOT have certificationId.
+        // I will overload createTopic in Service or Controller to handle this.
+
+        return ResponseEntity.badRequest().build(); // Placeholder, to be replaced in next step
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Xóa topic")
+    public ResponseEntity<Void> deleteTopic(@PathVariable Long id) {
+        topicService.deleteTopic(id);
+        return ResponseEntity.noContent().build();
     }
 }

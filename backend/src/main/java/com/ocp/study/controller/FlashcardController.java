@@ -27,15 +27,18 @@ public class FlashcardController {
     private final FlashcardService flashcardService;
 
     @GetMapping
-    @Operation(summary = "Lấy tất cả flashcards")
-    public ResponseEntity<List<FlashcardDTO>> getAllFlashcards() {
-        return ResponseEntity.ok(flashcardService.getAllFlashcards());
+    @Operation(summary = "Lấy tất cả flashcards (có phân trang)")
+    public ResponseEntity<org.springframework.data.domain.Page<FlashcardDTO>> getAllFlashcards(
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(flashcardService.getAllFlashcards(pageable));
     }
 
     @GetMapping("/topic/{topicId}")
-    @Operation(summary = "Lấy flashcards theo topic")
-    public ResponseEntity<List<FlashcardDTO>> getFlashcardsByTopic(@PathVariable Long topicId) {
-        return ResponseEntity.ok(flashcardService.getFlashcardsByTopic(topicId));
+    @Operation(summary = "Lấy flashcards theo topic (có phân trang)")
+    public ResponseEntity<org.springframework.data.domain.Page<FlashcardDTO>> getFlashcardsByTopic(
+            @PathVariable Long topicId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(flashcardService.getFlashcardsByTopic(topicId, pageable));
     }
 
     @GetMapping("/review")

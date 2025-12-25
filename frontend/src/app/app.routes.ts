@@ -99,6 +99,14 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         title: 'Import CSV - Admin'
     },
+    // ADMIN ROUTES
+    {
+        path: 'admin/certifications',
+        loadComponent: () => import('./features/admin/certification-list/certification-list.component')
+            .then(m => m.CertificationListComponent),
+        canActivate: [adminGuard],
+        title: 'Quản lý Chứng chỉ - Admin'
+    },
     {
         path: 'admin/certifications/create',
         loadComponent: () => import('./features/admin/certification-create/certification-create.component')
@@ -107,11 +115,46 @@ export const routes: Routes = [
         title: 'Tạo chứng chỉ - Admin'
     },
     {
+        path: 'admin/certifications/edit/:id',
+        loadComponent: () => import('./features/admin/certification-create/certification-create.component')
+            .then(m => m.CertificationCreateComponent),
+        canActivate: [adminGuard],
+        title: 'Sửa chứng chỉ - Admin'
+    },
+    {
+        path: 'admin/topics/create',
+        loadComponent: () => import('./features/admin/topic-create/topic-create.component')
+            .then(m => m.TopicCreateComponent),
+        canActivate: [adminGuard],
+        title: 'Tạo Topic - Admin'
+    },
+    {
+        path: 'admin/topics',
+        loadComponent: () => import('./features/admin/topic-list/topic-list.component')
+            .then(m => m.TopicListComponent),
+        canActivate: [adminGuard],
+        title: 'Quản lý Topics - Admin'
+    },
+    {
         path: 'admin/flashcards/create',
         loadComponent: () => import('./features/admin/flashcard-create/flashcard-create.component')
             .then(m => m.FlashcardCreateComponent),
         canActivate: [adminGuard],
         title: 'Tạo Flashcard - Admin'
+    },
+    {
+        path: 'admin/flashcards',
+        loadComponent: () => import('./features/admin/flashcard-list/flashcard-list.component')
+            .then(m => m.FlashcardListComponent),
+        canActivate: [adminGuard],
+        title: 'Quản lý Flashcards - Admin'
+    },
+    {
+        path: 'admin/flashcards/edit/:id',
+        loadComponent: () => import('./features/admin/flashcard-create/flashcard-create.component')
+            .then(m => m.FlashcardCreateComponent),
+        canActivate: [adminGuard],
+        title: 'Sửa Flashcard - Admin'
     },
     {
         path: 'admin/questions',

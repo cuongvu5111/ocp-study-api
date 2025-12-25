@@ -45,4 +45,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findAllWithSubtopicsByCertificationId(Long certificationId);
 
     long countByCertificationId(Long certificationId);
+
+    org.springframework.data.domain.Page<Topic> findAllByCertificationId(Long certificationId,
+            org.springframework.data.domain.Pageable pageable);
 }

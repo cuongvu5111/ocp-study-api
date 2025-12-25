@@ -21,9 +21,10 @@ export class CertificationListComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.certificationService.getAllCertifications().subscribe({
-            next: (data) => {
-                this.certifications = data;
+        // Load certifications for user certification selection
+        this.certificationService.getAllCertifications(0, 100).subscribe({
+            next: (data: any) => {
+                this.certifications = data.content || data;
                 this.isLoading = false;
             },
             error: (err) => {

@@ -102,6 +102,15 @@ import { ApiService } from '../../../core/services/api.service';
           </tbody>
         </table>
       </div>
+      
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+            <button class="btn btn--secondary" [disabled]="currentPage() === 0" (click)="onPageChange(currentPage() - 1)">Previous</button>
+            <span>Page {{ currentPage() + 1 }} of {{ totalPages }}</span>
+            <button class="btn btn--secondary" [disabled]="currentPage() >= totalPages - 1" (click)="onPageChange(currentPage() + 1)">Next</button>
+        </div>
+      }
       }
 
       @if (message()) {
@@ -292,6 +301,16 @@ import { ApiService } from '../../../core/services/api.service';
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        
+        span { font-weight: 500; }
+    }
   `]
 })
 export class QuestionListComponent implements OnInit {
@@ -302,15 +321,25 @@ export class QuestionListComponent implements OnInit {
   message = signal<string | null>(null);
   isError = signal(false);
 
+  // Pagination
+  currentPage = signal(0);
+  pageSize = signal(10);
+  totalElements = signal(0);
+
+  get totalPages(): number {
+    return Math.ceil(this.totalElements() / this.pageSize());
+  }
+
   ngOnInit() {
     this.loadQuestions();
   }
 
   loadQuestions() {
     this.loading.set(true);
-    this.apiService.getQuestions().subscribe({
+    this.apiService.getQuestions(this.currentPage(), this.pageSize()).subscribe({
       next: (data) => {
-        this.questions.set(data);
+        this.questions.set(data.content);
+        this.totalElements.set(data.totalElements);
         this.loading.set(false);
       },
       error: (err) => {
@@ -319,6 +348,11 @@ export class QuestionListComponent implements OnInit {
         this.showMessage('Lỗi tải danh sách câu hỏi', true);
       }
     });
+  }
+
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+    this.loadQuestions();
   }
 
   getTopicCount(): number {

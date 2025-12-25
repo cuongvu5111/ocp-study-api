@@ -1,7 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CertificationService } from '../../../core/services/certification.service';
 
 @Component({
@@ -46,7 +46,7 @@ import { CertificationService } from '../../../core/services/certification.servi
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--color-border);
-      color: #e2e8f0; /* Clearly visible light text */
+      color: #e2e8f0;
       
       &:focus {
         outline: none;
@@ -55,9 +55,9 @@ import { CertificationService } from '../../../core/services/certification.servi
     }
 
     select option {
-        background-color: #1e293b; /* Dark background for dropdown options */
-        color: #e2e8f0;
-        padding: 10px;
+      background-color: #1e293b;
+      color: #e2e8f0;
+      padding: 10px;
     }
 
     .month-section {
@@ -98,9 +98,9 @@ import { CertificationService } from '../../../core/services/certification.servi
     }
 
     .btn-danger {
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-        padding: 0.5rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      padding: 0.5rem;
     }
 
     .header-actions {
@@ -111,92 +111,175 @@ import { CertificationService } from '../../../core/services/certification.servi
     }
 
     .icon-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-        gap: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+      gap: 0.5rem;
     }
 
     .icon-option {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--color-border);
-        cursor: pointer;
-        transition: all 0.2s;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      transition: all 0.2s;
         
-        &:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
 
-        &.selected {
-            background: var(--color-primary);
-            border-color: var(--color-primary);
-            color: white;
-        }
+      &.selected {
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+        color: white;
+      }
 
-        .material-icons-outlined {
-            font-size: 20px;
-        }
+      .material-icons-outlined {
+        font-size: 20px;
+      }
     }
 
     .icon-preview {
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid var(--color-border);
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--color-border);
     }
   `]
 })
-export class CertificationCreateComponent {
+export class CertificationCreateComponent implements OnInit {
   private fb = inject(FormBuilder);
   private certService = inject(CertificationService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  form: FormGroup;
+  // Steps
+  currentStep = signal(1);
   loading = signal(false);
-  activeMonth = signal(1);
 
+  // Edit mode
+  isEditMode = signal(false);
+  certId = signal<number | null>(null);
+
+  // Constants
   readonly icons = [
-    'school', 'menu_book', 'auto_stories', 'library_books', // Study
-    'code', 'laptop', 'terminal', 'developer_mode', // Coding
-    'cloud', 'dns', 'security', 'memory', 'storage', // Infra
-    'quiz', 'question_mark', 'task_alt', 'grade', // Exam
-    'rocket', 'stars', 'verified', 'language' // Misc
+    'school', 'code', 'terminal', 'bug_report', 'cast_for_education',
+    'verified', 'military_tech', 'psychology', 'auto_stories', 'history_edu',
+    'menu_book', 'library_books', 'build', 'developer_mode', 'dns'
   ];
 
-  constructor() {
-    this.form = this.fb.group({
-      name: ['', Validators.required],
-      code: ['', Validators.required],
-      description: [''],
-      icon: ['school'],
-      durationMonths: [3, Validators.required], // Default 3 months
-      topics: this.fb.array([])
-    });
+  readonly months = [1, 2, 3, 4, 5, 6];
 
-    // Initialize initial active month topics container? 
-    // Actually we will filter topics by month in the template or maintain a single array and filter.
-    // Let's use a simpler approach: A FormArray of Topics, each having a 'month' field.
+  activeMonth = signal(1);
+
+  form = this.fb.group({
+    name: ['', Validators.required],
+    description: ['', Validators.required],
+    icon: ['school', Validators.required],
+    durationMonths: [6, [Validators.required, Validators.min(1), Validators.max(12)]],
+    level: ['Intermediate', Validators.required],
+    startDate: [''],
+    endDate: [{ value: '', disabled: true }],
+    topics: this.fb.array([])
+  });
+
+  get topicsAry() {
+    return this.form.get('topics') as FormArray;
   }
 
   get topics() {
     return this.form.get('topics') as FormArray;
   }
 
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode.set(true);
+      this.certId.set(Number(id));
+      this.loadCertification(Number(id));
+    } else {
+      // Initialize with one topic if new
+      this.addTopic(1);
+    }
+
+    // Setup auto-calculation for endDate
+    this.setupDateCalculation();
+  }
+
+  setupDateCalculation() {
+    // Listen to changes in startDate and durationMonths
+    this.form.get('startDate')?.valueChanges.subscribe(() => this.calculateEndDate());
+    this.form.get('durationMonths')?.valueChanges.subscribe(() => this.calculateEndDate());
+  }
+
+  calculateEndDate() {
+    const startDate = this.form.get('startDate')?.value;
+    const durationMonths = this.form.get('durationMonths')?.value;
+
+    if (startDate && durationMonths) {
+      const start = new Date(startDate);
+      const end = new Date(start);
+      end.setMonth(end.getMonth() + durationMonths);
+
+      // Format to YYYY-MM-DD
+      const endDateStr = end.toISOString().split('T')[0];
+      this.form.get('endDate')?.setValue(endDateStr, { emitEvent: false });
+    }
+  }
+
+  loadCertification(id: number) {
+    this.loading.set(true);
+    this.certService.getCertificationById(id).subscribe({
+      next: (cert: any) => { // Use specific type if available
+        this.form.patchValue({
+          name: cert.name,
+          description: cert.description,
+          icon: cert.icon || 'school',
+          durationMonths: cert.durationMonths || 6,
+          level: cert.level || 'Intermediate',
+          startDate: cert.startDate || '',
+          endDate: cert.endDate || ''
+        });
+
+        // Clear existing topics first
+        while (this.topics.length !== 0) {
+          this.topics.removeAt(0);
+        }
+
+        // Add topics from response
+        if (cert.topics && Array.isArray(cert.topics)) {
+          cert.topics.forEach((t: any) => {
+            const group = this.fb.group({
+              id: [t.id], // Keep ID for updates
+              name: [t.name, Validators.required],
+              description: [t.description],
+              icon: [t.icon || 'menu_book'],
+              month: [t.month || 1]
+            });
+            this.topics.push(group);
+          });
+        }
+        this.loading.set(false);
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.loading.set(false);
+        alert('Không thể tải thông tin chứng chỉ');
+        this.router.navigate(['/admin/certifications']);
+      }
+    });
+  }
+
   topicsByMonth(month: number) {
-    // Helper to get controls for a specific month for view
-    // Since FormArray is linear, we iterate.
-    // However, Angular FormArray in template best works with direct iteration.
-    // We will do a filter in the template or just show all and group visually?
-    // Better: Helper method to add topic specifically for a month
+    // This is probably not needed if using getTopicsForMonth in template
     return [];
   }
 
@@ -216,9 +299,11 @@ export class CertificationCreateComponent {
 
   getTopicsForMonth(month: number) {
     const controls = this.topics.controls;
-    const indices = [];
+    const indices: number[] = [];
     for (let i = 0; i < controls.length; i++) {
-      if (controls[i].get('month')?.value === month) {
+      // cast to any or abstractcontrol to check value
+      const ctrlMonth = controls[i].get('month')?.value;
+      if (ctrlMonth === month) {
         indices.push(i);
       }
     }
@@ -230,22 +315,43 @@ export class CertificationCreateComponent {
   }
 
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading.set(true);
-    const formData = this.form.value;
+    const formVal = this.form.value;
 
-    this.certService.createCertification(formData).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/certifications']);
-      },
-      error: (err) => {
-        console.error(err);
-        this.loading.set(false);
-        alert('Lỗi khi tạo chứng chỉ');
-      }
-    });
+    const payload = {
+      ...formVal,
+    };
+
+    if (this.isEditMode()) {
+      this.certService.updateCertification(this.certId()!, payload).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.router.navigate(['/admin/certifications']); // Go back to list
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.loading.set(false);
+          alert('Lỗi khi cập nhật chứng chỉ');
+        }
+      });
+    } else {
+      this.certService.createCertification(payload).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.router.navigate(['/admin/certifications']);
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.loading.set(false);
+          alert('Lỗi khi tạo chứng chỉ');
+        }
+      });
+    }
   }
 
   get monthsArray() {

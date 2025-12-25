@@ -4,4 +4,5 @@ export interface Certification {
     code: string;
     description: string;
     icon: string;
+    durationMonths: number;
 }

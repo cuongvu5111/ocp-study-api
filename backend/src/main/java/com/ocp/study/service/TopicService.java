@@ -37,13 +37,14 @@ public class TopicService {
         /**
          * Lấy tất cả topics với progress của user theo certificate
          */
-        public List<TopicDTO> getAllTopics(String userId, Long certificationId) {
-                List<Topic> topics;
+        public org.springframework.data.domain.Page<TopicDTO> getAllTopics(String userId, Long certificationId,
+                        org.springframework.data.domain.Pageable pageable) {
+                org.springframework.data.domain.Page<Topic> topicsPage;
                 if (certificationId != null) {
-                        topics = topicRepository.findAllWithSubtopicsByCertificationId(certificationId);
+                        // Need to update repository to return Page
+                        topicsPage = topicRepository.findAllByCertificationId(certificationId, pageable);
                 } else {
-                        // Fallback for compatibility or admin view
-                        topics = topicRepository.findAllWithSubtopics();
+                        topicsPage = topicRepository.findAll(pageable);
                 }
 
                 List<TopicProgress> userProgress = progressRepository.findByUserId(userId);
@@ -55,9 +56,7 @@ public class TopicService {
                                                 p -> p,
                                                 (a, b) -> b));
 
-                return topics.stream()
-                                .map(topic -> mapToDTO(topic, progressMap))
-                                .collect(Collectors.toList());
+                return topicsPage.map(topic -> mapToDTO(topic, progressMap));
         }
 
         /**
@@ -146,4 +145,69 @@ public class TopicService {
                                 .completionPercentage(progress != null ? progress.getCompletionPercentage() : 0)
                                 .build();
         }
+
+        /**
+         * Tạo topic mới
+         */
+        @Transactional
+        public TopicDTO createTopic(com.ocp.study.dto.CreateTopicRequest request, Long certificationId) {
+                if (certificationId == null) {
+                        throw new IllegalArgumentException("Certification ID is required");
+                }
+
+                com.ocp.study.entity.Certification cert = new com.ocp.study.entity.Certification();
+                cert.setId(certificationId); // Reference by ID
+
+                Topic topic = new Topic();
+                topic.setName(request.getName());
+                topic.setDescription(request.getDescription());
+                topic.setIcon(request.getIcon());
+                topic.setMonth(request.getMonth());
+                topic.setCertification(cert);
+                topic.setOrderIndex(100); // Default order for now
+                topic.setEstimatedDays(7);
+
+                // Handle subtopics
+                if (request.getSubtopics() != null && !request.getSubtopics().isEmpty()) {
+                        for (com.ocp.study.dto.CreateTopicRequest.CreateSubtopicRequest subtopicReq : request
+                                        .getSubtopics()) {
+                                Subtopic subtopic = new Subtopic();
+                                subtopic.setName(subtopicReq.getName());
+                                subtopic.setDescription(subtopicReq.getDescription());
+                                subtopic.setDifficulty(
+                                                subtopicReq.getDifficulty() != null ? subtopicReq.getDifficulty() : 1);
+                                subtopic.setEstimatedDays(
+                                                subtopicReq.getEstimatedDays() != null ? subtopicReq.getEstimatedDays()
+                                                                : 1);
+                                subtopic.setOrderIndex(
+                                                subtopicReq.getOrderIndex() != null ? subtopicReq.getOrderIndex() : 0);
+
+                                // Parse priority
+                                try {
+                                        subtopic.setPriority(Subtopic.Priority.valueOf(
+                                                        subtopicReq.getPriority() != null ? subtopicReq.getPriority()
+                                                                        : "MEDIUM"));
+                                } catch (IllegalArgumentException e) {
+                                        subtopic.setPriority(Subtopic.Priority.MEDIUM);
+                                }
+
+                                topic.addSubtopic(subtopic);
+                        }
+                }
+
+                topic = topicRepository.save(topic);
+                return mapToDTO(topic, new java.util.HashMap<>());
+        }
+
+        /**
+         * Xóa topic
+         */
+        @Transactional
+        public void deleteTopic(Long id) {
+                if (!topicRepository.existsById(id)) {
+                        throw new RuntimeException("Topic not found: " + id);
+                }
+                topicRepository.deleteById(id);
+        }
+
 }

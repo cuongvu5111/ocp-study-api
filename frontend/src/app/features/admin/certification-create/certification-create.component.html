@@ -1,7 +1,7 @@
 <div class="create-cert-container">
     <div class="header-actions">
-        <h1>Tạo Chứng Chỉ Mới</h1>
-        <button class="btn btn-secondary" routerLink="/dashboard">Hủy</button>
+        <h1>{{ isEditMode() ? 'Sửa Chứng Chỉ' : 'Tạo Chứng Chỉ Mới' }}</h1>
+        <button class="btn btn-secondary" routerLink="/admin/certifications">Hủy</button>
     </div>
 
     <div class="card">
@@ -39,6 +39,17 @@
                         <option [value]="12">12 Tháng</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Thời gian bắt đầu</label>
+                    <input type="date" formControlName="startDate" placeholder="Chọn ngày bắt đầu">
+                </div>
+                <div class="form-group">
+                    <label>Thời gian kết thúc (Tự động tính)</label>
+                    <input type="date" formControlName="endDate" readonly
+                        style="background: rgba(255,255,255,0.02); cursor: not-allowed;">
+                    <small style="color: #94a3b8; font-size: 0.875rem;">Được tính tự động dựa trên thời gian bắt đầu +
+                        thời gian học</small>
+                </div>
             </div>
 
             <!-- Study Plan -->
@@ -66,10 +77,8 @@
                                         <select formControlName="icon" style="flex: 1;">
                                             <option *ngFor="let icon of icons" [value]="icon">{{ icon }}</option>
                                         </select>
-                                        <div class="icon-preview">
-                                            <span class="material-icons-outlined">{{
-                                                getTopicControl(i).get('icon')?.value }}</span>
-                                        </div>
+                                        <span class="material-icons-outlined">{{ getTopicControl(i).get('icon')?.value
+                                            }}</span>
                                     </div>
                                 </div>
                                 <button type="button" class="btn btn-danger" (click)="removeTopic(i)">
@@ -84,6 +93,7 @@
                     </button>
                 </div>
             </div>
+
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" [disabled]="loading() || form.invalid"

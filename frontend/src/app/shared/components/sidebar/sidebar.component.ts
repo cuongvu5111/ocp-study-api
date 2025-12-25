@@ -339,10 +339,9 @@ export class SidebarComponent implements OnInit {
   ]);
 
   adminNavItems = signal<NavItem[]>([
-    { label: 'Tạo chứng chỉ', icon: 'post_add', route: '/admin/certifications/create' },
-    { label: 'Tạo câu hỏi', icon: 'add_circle', route: '/admin/questions/create' },
-    { label: 'Tạo flashcard', icon: 'style', route: '/admin/flashcards/create' },
-    { label: 'Import CSV', icon: 'upload_file', route: '/admin/questions/import' },
+    { label: 'Quản lý Chứng chỉ', icon: 'verified', route: '/admin/certifications' },
+    { label: 'Quản lý Topics', icon: 'menu_book', route: '/admin/topics' },
+    { label: 'Quản lý Flashcards', icon: 'style', route: '/admin/flashcards' },
     { label: 'Quản lý câu hỏi', icon: 'list_alt', route: '/admin/questions' },
   ]);
 

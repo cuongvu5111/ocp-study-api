@@ -1,16 +1,16 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 import { CertificationService } from '../../../core/services/certification.service';
 
 @Component({
-    selector: 'app-flashcard-create',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
-    templateUrl: './flashcard-create.component.html',
-    styles: [`
+  selector: 'app-flashcard-create',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './flashcard-create.component.html',
+  styles: [`
     .admin-container {
       max-width: 800px;
       margin: 0 auto;
@@ -121,100 +121,139 @@ import { CertificationService } from '../../../core/services/certification.servi
   `]
 })
 export class FlashcardCreateComponent implements OnInit {
-    private apiService = inject(ApiService);
-    private certService = inject(CertificationService);
-    private router = inject(Router);
+  private apiService = inject(ApiService);
+  private certService = inject(CertificationService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute); // Add ActivatedRoute
 
-    certifications = signal<any[]>([]);
-    topics = signal<any[]>([]);
+  certifications = signal<any[]>([]);
+  topics = signal<any[]>([]);
 
-    selectedCertId: number | null = null;
-    topicId: number | null = null;
+  selectedCertId: number | null = null;
+  topicId: number | null = null;
+  flashcardId: number | null = null; // Track current flashcard ID
+  isEditMode = signal(false);
 
-    front = '';
-    back = '';
-    codeExample = '';
+  front = '';
+  back = '';
+  codeExample = '';
 
-    loading = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
 
-    ngOnInit() {
-        this.loadCertifications();
+  ngOnInit() {
+    this.loadCertifications();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode.set(true);
+      this.flashcardId = Number(id);
+      this.loadFlashcard(this.flashcardId);
     }
+  }
 
-    loadCertifications() {
-        this.certService.getAllCertifications().subscribe({
-            next: (data) => {
-                this.certifications.set(data);
-                // Optionally select the first one or the one currently active in sidebar
-            },
-            error: (err) => console.error('Error loading certifications:', err)
-        });
-    }
+  loadCertifications() {
+    this.certService.getAllCertifications(0, 100).subscribe({
+      next: (data: any) => {
+        this.certifications.set(data.content || data);
+      },
+      error: (err) => console.error('Error loading certifications:', err)
+    });
+  }
 
-    onCertChange() {
-        this.topicId = null;
-        this.topics.set([]);
-        if (this.selectedCertId) {
-            this.loadTopics(this.selectedCertId);
+  loadFlashcard(id: number) {
+    this.loading.set(true);
+    this.apiService.getFlashcardById(id).subscribe({
+      next: (data: any) => {
+        this.front = data.front;
+        this.back = data.back;
+        this.codeExample = data.codeExample;
+        this.selectedCertId = null; // We might not know cert ID directly from flashcard response easily without extra calls or DTO change
+        // But usually flashcard -> topic -> cert.
+        // If DTO contains topicId, we can load topics.
+        if (data.topicId) {
+          this.topicId = data.topicId;
+          // We need to find the cert for this topic to set selectedCertId correctly?
+          // Or just load the topic to get its certId?
+          this.apiService.getTopicById(data.topicId).subscribe(topic => {
+            this.selectedCertId = topic.certificationId;
+            this.loadTopics(this.selectedCertId!);
+            this.topicId = topic.id; // Ensure consistent type
+          });
         }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.error.set('Không thể tải flashcard');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  onCertChange() {
+    this.topicId = null;
+    this.topics.set([]);
+    if (this.selectedCertId) {
+      this.loadTopics(this.selectedCertId);
+    }
+  }
+
+  loadTopics(certId: number) {
+    this.apiService.getTopics(certId).subscribe({
+      next: (data) => this.topics.set(data),
+      error: (err) => console.error('Error loading topics:', err)
+    });
+  }
+
+  onSubmit() {
+    if (!this.topicId || !this.front || !this.back) {
+      this.error.set('Vui lòng điền đầy đủ các trường bắt buộc (*)');
+      return;
     }
 
-    loadTopics(certId: number) {
-        this.apiService.getTopics(certId).subscribe({
-            next: (data) => this.topics.set(data),
-            error: (err) => console.error('Error loading topics:', err)
-        });
-    }
+    const payload = {
+      topicId: Number(this.topicId),
+      front: this.front,
+      back: this.back,
+      codeExample: this.codeExample || null
+    };
 
-    onSubmit() {
-        if (!this.topicId || !this.front || !this.back) {
-            this.error.set('Vui lòng điền đầy đủ các trường bắt buộc (*)');
-            return;
+    this.loading.set(true);
+    this.error.set(null);
+    this.success.set(null);
+
+    if (this.isEditMode()) {
+      this.apiService.updateFlashcard(this.flashcardId!, payload).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.success.set('Cập nhật Flashcard thành công!');
+          this.router.navigate(['/admin/flashcards']);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.error.set(err.error?.message || 'Lỗi khi cập nhật Flashcard');
         }
-
-        const payload = {
-            topic: { id: this.topicId }, // Use object ID reference or just ID depending on DTO
-            // Based on backend FlashcardDTO, it might expect topicId or Topic object.
-            // Let's check FlashcardDTO if I can. safely assume nested object or just ID field mapped.
-            // Actually usually create endpoints take ID. 
-            // Looking at FlashcardController: createFlashcard(@Valid @RequestBody FlashcardDTO dto)
-            // I should check FlashcardDTO definition. But commonly it's topicId.
-            // Let's try sending topicId if flattened, or nested object.
-            // Safe bet: usually we send { topicId: ... } or { topic: { id: ... } }
-            // Let's check ApiService.createFlashcard, it just posts data.
-            // I'll guess flattened `topicId` first, if not I'll try nested.
-            // Wait, looking at QuestionCreateComponent, it sends `topicId` as root field!
-            // `topicId: Number(this.topicId)` -> createQuestion works.
-            // Assuming FlashcardDTO follows same pattern.
-            topicId: Number(this.topicId),
-            front: this.front,
-            back: this.back,
-            codeExample: this.codeExample || null
-        };
-
-        this.loading.set(true);
-        this.error.set(null);
-        this.success.set(null);
-
-        this.apiService.createFlashcard(payload).subscribe({
-            next: () => {
-                this.loading.set(false);
-                this.success.set('Tạo Flashcard thành công!');
-                this.resetForm();
-            },
-            error: (err) => {
-                this.loading.set(false);
-                this.error.set(err.error?.message || 'Lỗi khi tạo Flashcard');
-            }
-        });
+      });
+    } else {
+      this.apiService.createFlashcard(payload).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.success.set('Tạo Flashcard thành công!');
+          this.resetForm();
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.error.set(err.error?.message || 'Lỗi khi tạo Flashcard');
+        }
+      });
     }
+  }
 
-    resetForm() {
-        this.front = '';
-        this.back = '';
-        this.codeExample = '';
-        // Keep Cert and Topic selected for faster entry
-    }
+  resetForm() {
+    this.front = '';
+    this.back = '';
+    this.codeExample = '';
+    // Keep Cert and Topic selected for faster entry
+  }
 }

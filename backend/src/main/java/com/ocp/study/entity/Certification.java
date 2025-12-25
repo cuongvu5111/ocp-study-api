@@ -47,6 +47,18 @@ public class Certification {
     @Column(length = 50)
     private String icon;
 
+    /**
+     * Ngày bắt đầu học chứng chỉ
+     */
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate;
+
+    /**
+     * Ngày dự kiến hoàn thành
+     */
+    @Column(name = "end_date")
+    private java.time.LocalDate endDate;
+
     @Column(name = "duration_months")
     private Integer durationMonths;
 

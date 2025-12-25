@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class DocumentService {
 
     private final DocumentRepository documentRepository;
@@ -53,10 +54,17 @@ public class DocumentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chứng chỉ với ID: " + certificationId));
 
         // Normalize file name and prevent duplicates/conflicts
-        String originalFileName = org.springframework.util.StringUtils.cleanPath(file.getOriginalFilename());
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null) {
+            throw new RuntimeException("Filename is null");
+        }
+        originalFileName = org.springframework.util.StringUtils.cleanPath(originalFileName);
+
         String fileExtension = "";
         try {
-            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            if (originalFileName.contains(".")) {
+                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            }
         } catch (Exception e) {
             fileExtension = "";
         }

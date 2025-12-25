@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@SuppressWarnings("null")
 public class FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
@@ -39,29 +40,44 @@ public class FlashcardService {
     /**
      * Lấy tất cả flashcards (chưa filter theo user)
      */
-    public List<FlashcardDTO> getAllFlashcards() {
-        return flashcardRepository.findAll().stream()
-                .map(fc -> mapToDTO(fc, null))
-                .collect(Collectors.toList());
+    /**
+     * Lấy tất cả flashcards (chưa filter theo user)
+     */
+    public org.springframework.data.domain.Page<FlashcardDTO> getAllFlashcards(
+            org.springframework.data.domain.Pageable pageable) {
+        return flashcardRepository.findAll(pageable)
+                .map(fc -> mapToDTO(fc, null));
     }
 
     /**
      * Lấy flashcards theo topic với user review data
      */
-    public List<FlashcardDTO> getFlashcardsByTopic(Long topicId) {
+    public org.springframework.data.domain.Page<FlashcardDTO> getFlashcardsByTopic(Long topicId,
+            org.springframework.data.domain.Pageable pageable) {
         User user = userService.getCurrentUser();
-        List<Flashcard> flashcards = flashcardRepository.findByTopicIdOrderByCreatedAtDesc(topicId);
+        // Repository needs to support pagination
+        org.springframework.data.domain.Page<Flashcard> flashcards = flashcardRepository
+                .findByTopicIdOrderByCreatedAtDesc(topicId, pageable);
 
-        // Get all reviews for this user
+        // Get all reviews for this user (for the current page's flashcards would be
+        // efficient, but map lookup is okay even for a page)
+        // Ideally we fetch reviews only for the flashcard IDs in the page
+        List<Long> flashcardIds = flashcards.getContent().stream().map(Flashcard::getId).collect(Collectors.toList());
+
+        // This is a bit inefficient if we fetch ALL reviews for topic.
+        // Better: findByFlashcardIdInAndUser(ids, user)
+        // But for now, let's stick to simple logic or optimize if Review Repo supports
+        // it.
+        // Assuming findByUserAndTopicId returns all for topic.
+
         Map<Long, FlashcardReview> reviewMap = flashcardReviewRepository.findByUserAndTopicId(user, topicId)
                 .stream()
+                .filter(fr -> flashcardIds.contains(fr.getFlashcard().getId()))
                 .collect(Collectors.toMap(
                         fr -> fr.getFlashcard().getId(),
                         fr -> fr));
 
-        return flashcards.stream()
-                .map(fc -> mapToDTO(fc, reviewMap.get(fc.getId())))
-                .collect(Collectors.toList());
+        return flashcards.map(fc -> mapToDTO(fc, reviewMap.get(fc.getId())));
     }
 
     /**

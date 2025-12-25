@@ -18,12 +18,14 @@ export class ApiService {
 
     // ==================== TOPICS ====================
 
-    getTopics(certificationId?: number): Observable<any[]> {
+    getTopics(certificationId?: number, page?: number, size?: number): Observable<any> {
         let url = `${this.baseUrl}/topics`;
-        if (certificationId) {
-            url += `?certificationId=${certificationId}`;
-        }
-        return this.http.get<any[]>(url);
+        const params: any = {};
+        if (certificationId) params.certificationId = certificationId;
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+
+        return this.http.get<any>(url, { params });
     }
 
     getTopicById(id: number): Observable<any> {
@@ -48,16 +50,26 @@ export class ApiService {
 
     // ==================== FLASHCARDS ====================
 
-    getFlashcards(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.baseUrl}/flashcards`);
+    getFlashcards(page?: number, size?: number): Observable<any> {
+        let params: any = {};
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+        return this.http.get<any>(`${this.baseUrl}/flashcards`, { params });
     }
 
-    getFlashcardsByTopic(topicId: number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.baseUrl}/flashcards/topic/${topicId}`);
+    getFlashcardsByTopic(topicId: number, page?: number, size?: number): Observable<any> {
+        let params: any = {};
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+        return this.http.get<any>(`${this.baseUrl}/flashcards/topic/${topicId}`, { params });
     }
 
     getFlashcardsToReview(): Observable<any[]> {
         return this.http.get<any[]>(`${this.baseUrl}/flashcards/review`);
+    }
+
+    getFlashcardById(id: number): Observable<any> {
+        return this.http.get<any>(`${this.baseUrl}/flashcards/${id}`);
     }
 
     createFlashcard(flashcard: any): Observable<any> {
@@ -133,8 +145,11 @@ export class ApiService {
 
     // ==================== ADMIN ====================
 
-    getQuestions(): Observable<any[]> {
-        return this.http.get<any[]>(`${this.baseUrl}/admin/questions`);
+    getQuestions(page?: number, size?: number): Observable<any> { // Returns Page<Question>
+        let params: any = {};
+        if (page !== undefined) params.page = page;
+        if (size !== undefined) params.size = size;
+        return this.http.get<any>(`${this.baseUrl}/admin/questions`, { params });
     }
 
     getQuestionById(id: number): Observable<any> {

@@ -45,22 +45,21 @@ public class QuestionAdminController {
      * GET /admin/questions - Lấy danh sách tất cả câu hỏi
      */
     @GetMapping("/questions")
-    public ResponseEntity<List<Map<String, Object>>> getAllQuestions() {
-        List<Question> questions = questionRepository.findAll();
+    public ResponseEntity<org.springframework.data.domain.Page<Map<String, Object>>> getAllQuestions(
+            org.springframework.data.domain.Pageable pageable) {
+        org.springframework.data.domain.Page<Question> questionsPage = questionRepository.findAll(pageable);
 
-        List<Map<String, Object>> result = questions.stream()
-                .map(q -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("id", q.getId());
-                    map.put("content", q.getContent());
-                    map.put("topicId", q.getTopic().getId());
-                    map.put("topicName", q.getTopic().getName());
-                    map.put("difficulty", q.getDifficulty());
-                    map.put("questionType", q.getQuestionType().name());
-                    map.put("optionsCount", q.getOptions().size());
-                    return map;
-                })
-                .toList();
+        org.springframework.data.domain.Page<Map<String, Object>> result = questionsPage.map(q -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", q.getId());
+            map.put("content", q.getContent());
+            map.put("topicId", q.getTopic().getId());
+            map.put("topicName", q.getTopic().getName());
+            map.put("difficulty", q.getDifficulty());
+            map.put("questionType", q.getQuestionType().name());
+            map.put("optionsCount", q.getOptions().size());
+            return map;
+        });
 
         return ResponseEntity.ok(result);
     }

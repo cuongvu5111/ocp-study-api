@@ -22,6 +22,9 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
      */
     List<Flashcard> findByTopicIdOrderByCreatedAtDesc(Long topicId);
 
+    org.springframework.data.domain.Page<Flashcard> findByTopicIdOrderByCreatedAtDesc(Long topicId,
+            org.springframework.data.domain.Pageable pageable);
+
     /**
      * Lấy flashcards theo subtopic
      */

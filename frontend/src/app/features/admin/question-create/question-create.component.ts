@@ -328,8 +328,8 @@ export class QuestionCreateComponent implements OnInit {
   }
 
   loadCertifications() {
-    this.certService.getAllCertifications().subscribe({
-      next: (data) => this.certifications.set(data),
+    this.certService.getAllCertifications(0, 100).subscribe({
+      next: (data: any) => this.certifications.set(data.content || data),
       error: (err) => console.error('Error loading certifications:', err)
     });
   }
