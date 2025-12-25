@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository cho Question entity.
@@ -14,20 +15,20 @@ import java.util.List;
  * @since 1.0.0
  */
 @Repository
-public interface QuestionRepository extends JpaRepository<Question, Long> {
+public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     /**
      * Lấy questions theo topic
      */
-    List<Question> findByTopicId(Long topicId);
+    List<Question> findByTopicId(UUID topicId);
 
-    long countByTopic_Certification_Id(Long certificationId);
+    long countByTopic_Certification_Id(UUID certificationId);
 
     /**
      * Lấy questions với options (eager fetch)
      */
     @Query("SELECT DISTINCT q FROM Question q LEFT JOIN FETCH q.options WHERE q.topic.id = :topicId")
-    List<Question> findByTopicIdWithOptions(Long topicId);
+    List<Question> findByTopicIdWithOptions(UUID topicId);
 
     /**
      * Lấy ngẫu nhiên N câu hỏi để làm quiz
@@ -39,10 +40,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * Lấy ngẫu nhiên N câu hỏi theo topic
      */
     @Query(value = "SELECT * FROM questions WHERE topic_id = :topicId ORDER BY RANDOM() LIMIT :limit", nativeQuery = true)
-    List<Question> findRandomQuestionsByTopic(Long topicId, int limit);
+    List<Question> findRandomQuestionsByTopic(UUID topicId, int limit);
 
     /**
      * Đếm số câu hỏi theo topic
      */
-    long countByTopicId(Long topicId);
+    long countByTopicId(UUID topicId);
 }

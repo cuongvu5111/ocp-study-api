@@ -4,6 +4,8 @@ import com.ocp.study.entity.Subtopic;
 import com.ocp.study.entity.TopicProgress;
 import lombok.*;
 
+import java.util.UUID;
+
 /**
  * DTO cho Subtopic.
  * 
@@ -15,8 +17,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class SubtopicDTO {
-    private Long id;
-    private Long topicId;
+    private UUID id;
+    private UUID topicId;
     private String name;
     private String description;
     private Integer difficulty;

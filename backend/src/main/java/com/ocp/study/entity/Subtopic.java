@@ -3,6 +3,8 @@ package com.ocp.study.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 /**
  * Entity đại diện cho một Subtopic (chủ đề con) trong một Topic.
  * VD: "Primitives và Wrapper Classes" là subtopic của "Working with Java Data
@@ -21,8 +23,8 @@ import lombok.*;
 public class Subtopic {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * Topic cha của subtopic này

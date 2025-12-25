@@ -3,6 +3,7 @@ package com.ocp.study.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity lưu lịch sử làm quiz của user.
@@ -20,8 +21,8 @@ import java.time.LocalDateTime;
 public class QuizHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * User đã làm quiz này
@@ -40,7 +41,7 @@ public class QuizHistory {
      * Topic ID nếu là topic quiz
      */
     @Column(name = "topic_id")
-    private Long topicId;
+    private UUID topicId;
 
     /**
      * Topic name để hiển thị

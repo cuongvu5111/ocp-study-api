@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Entity đại diện cho một chứng chỉ.
@@ -20,8 +21,8 @@ import java.util.List;
 public class Certification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * Tên chứng chỉ. VD: "OCP Java SE 11 Developer"

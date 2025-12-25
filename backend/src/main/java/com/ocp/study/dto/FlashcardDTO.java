@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO cho Flashcard.
@@ -17,12 +18,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class FlashcardDTO {
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "Topic ID là bắt buộc")
-    private Long topicId;
+    private UUID topicId;
 
-    private Long subtopicId;
+    private UUID subtopicId;
 
     @NotBlank(message = "Mặt trước không được để trống")
     private String front;

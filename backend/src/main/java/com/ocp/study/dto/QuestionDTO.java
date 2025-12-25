@@ -4,6 +4,7 @@ import com.ocp.study.entity.Question;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * DTO cho Question (câu hỏi quiz).
@@ -16,8 +17,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class QuestionDTO {
-    private Long id;
-    private Long topicId;
+    private UUID id;
+    private UUID topicId;
     private String topicName;
     private String content;
     private String codeSnippet;
@@ -34,7 +35,7 @@ public class QuestionDTO {
     @AllArgsConstructor
     @Builder
     public static class OptionDTO {
-        private Long id;
+        private UUID id;
         private String optionKey;
         private String content;
         private Boolean isCorrect; // Chỉ trả về khi show answer

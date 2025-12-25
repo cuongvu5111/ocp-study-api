@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository cho Flashcard entity.
@@ -15,22 +16,22 @@ import java.util.List;
  * @since 1.0.0
  */
 @Repository
-public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
+public interface FlashcardRepository extends JpaRepository<Flashcard, UUID> {
 
     /**
      * Lấy flashcards theo topic
      */
-    List<Flashcard> findByTopicIdOrderByCreatedAtDesc(Long topicId);
+    List<Flashcard> findByTopicIdOrderByCreatedAtDesc(UUID topicId);
 
-    org.springframework.data.domain.Page<Flashcard> findByTopicIdOrderByCreatedAtDesc(Long topicId,
+    org.springframework.data.domain.Page<Flashcard> findByTopicIdOrderByCreatedAtDesc(UUID topicId,
             org.springframework.data.domain.Pageable pageable);
 
     /**
      * Lấy flashcards theo subtopic
      */
-    List<Flashcard> findBySubtopicIdOrderByCreatedAtDesc(Long subtopicId);
+    List<Flashcard> findBySubtopicIdOrderByCreatedAtDesc(UUID subtopicId);
 
-    long countByTopic_Certification_Id(Long certificationId);
+    long countByTopic_Certification_Id(UUID certificationId);
 
     /**
      * Lấy flashcards cần review (next_review <= now)
@@ -42,10 +43,10 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, Long> {
      * Lấy flashcards cần review theo topic
      */
     @Query("SELECT f FROM Flashcard f WHERE f.topic.id = :topicId AND (f.nextReview IS NULL OR f.nextReview <= :now) ORDER BY f.nextReview ASC")
-    List<Flashcard> findCardsToReviewByTopic(Long topicId, LocalDateTime now);
+    List<Flashcard> findCardsToReviewByTopic(UUID topicId, LocalDateTime now);
 
     /**
      * Đếm số flashcards theo topic
      */
-    long countByTopicId(Long topicId);
+    long countByTopicId(UUID topicId);
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository cho FlashcardReview.
@@ -19,7 +20,7 @@ import java.util.Optional;
  * @since 1.0.0
  */
 @Repository
-public interface FlashcardReviewRepository extends JpaRepository<FlashcardReview, Long> {
+public interface FlashcardReviewRepository extends JpaRepository<FlashcardReview, UUID> {
 
     /**
      * Tìm review của user cho flashcard cụ thể
@@ -47,5 +48,5 @@ public interface FlashcardReviewRepository extends JpaRepository<FlashcardReview
      * Lấy reviews của user theo topic
      */
     @Query("SELECT fr FROM FlashcardReview fr WHERE fr.user = :user AND fr.flashcard.topic.id = :topicId")
-    List<FlashcardReview> findByUserAndTopicId(@Param("user") User user, @Param("topicId") Long topicId);
+    List<FlashcardReview> findByUserAndTopicId(@Param("user") User user, @Param("topicId") UUID topicId);
 }

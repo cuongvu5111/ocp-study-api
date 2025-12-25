@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity theo dõi tiến độ học của user cho từng subtopic.
@@ -23,8 +24,8 @@ import java.time.LocalDateTime;
 public class TopicProgress {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * User ID (tạm thời dùng String, sau có thể link với User entity)

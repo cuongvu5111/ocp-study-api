@@ -3,6 +3,8 @@ package com.ocp.study.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 /**
  * Entity đại diện cho một đáp án của câu hỏi Quiz.
  * 
@@ -19,8 +21,8 @@ import lombok.*;
 public class QuestionOption {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * Câu hỏi mà đáp án thuộc về

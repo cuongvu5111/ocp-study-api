@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository cho Subtopic entity.
@@ -13,14 +14,14 @@ import java.util.List;
  * @since 1.0.0
  */
 @Repository
-public interface SubtopicRepository extends JpaRepository<Subtopic, Long> {
+public interface SubtopicRepository extends JpaRepository<Subtopic, UUID> {
 
     /**
      * Lấy subtopics theo topic
      */
-    List<Subtopic> findByTopicIdOrderByOrderIndexAsc(Long topicId);
+    List<Subtopic> findByTopicIdOrderByOrderIndexAsc(UUID topicId);
 
-    long countByTopic_Certification_Id(Long certificationId);
+    long countByTopic_Certification_Id(UUID certificationId);
 
     /**
      * Lấy subtopics theo priority

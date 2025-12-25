@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity lưu trữ lịch sử review flashcard của mỗi user.
@@ -24,8 +25,8 @@ import java.time.LocalDateTime;
 public class FlashcardReview {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * User đang review flashcard này

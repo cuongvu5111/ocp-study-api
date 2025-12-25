@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * Entity theo dõi study session hàng ngày (cho streak calendar).
@@ -23,8 +24,8 @@ import java.time.LocalDate;
 public class StudySession {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * User ID

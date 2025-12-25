@@ -3,6 +3,7 @@ package com.ocp.study.dto;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * DTO cho Topic để trả về cho client.
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class TopicDTO {
-    private Long id;
+    private UUID id;
     private String name;
     private String description;
     private String icon;

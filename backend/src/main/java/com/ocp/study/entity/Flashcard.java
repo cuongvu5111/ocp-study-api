@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Entity đại diện cho một Flashcard để ôn tập.
@@ -22,8 +23,8 @@ import java.time.LocalDateTime;
 public class Flashcard {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * Topic mà flashcard thuộc về

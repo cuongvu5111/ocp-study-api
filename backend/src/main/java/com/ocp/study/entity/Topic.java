@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Entity đại diện cho một Topic trong OCP exam.
@@ -23,8 +24,8 @@ import java.util.List;
 public class Topic {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     /**
      * Tên topic. VD: "Working with Java Data Types"
