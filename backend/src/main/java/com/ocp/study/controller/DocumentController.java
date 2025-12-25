@@ -60,15 +60,22 @@ public class DocumentController {
 
         String contentType = "application/pdf";
         String disposition = download ? "attachment" : "inline";
-        String fileName = document.getFileName();
 
-        // Fallback to title if fileName is missing or just use title as the download
-        // name
-        if (download && document.getTitle() != null && !document.getTitle().isEmpty()) {
-            fileName = document.getTitle();
-            if (!fileName.toLowerCase().endsWith(".pdf")) {
-                fileName += ".pdf";
-            }
+        // Xác định tên file để download/hiển thị
+        String fileName;
+        if (download) {
+            // Khi download: ưu tiên dùng title, fallback về fileName
+            fileName = (document.getTitle() != null && !document.getTitle().isEmpty())
+                    ? document.getTitle()
+                    : document.getFileName();
+        } else {
+            // Khi preview: dùng fileName
+            fileName = document.getFileName();
+        }
+
+        // Đảm bảo luôn có .pdf extension
+        if (!fileName.toLowerCase().endsWith(".pdf")) {
+            fileName += ".pdf";
         }
 
         String encodedFileName = UriUtils.encode(fileName, StandardCharsets.UTF_8);

@@ -335,7 +335,41 @@ export class DocumentListComponent implements OnInit {
 
   downloadDocument(doc: any) {
     const url = this.apiService.downloadDocument(doc.id);
-    window.open(url, '_self');
+
+    // Sử dụng fetch + blob để download với đúng tên file
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Download failed');
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        // Tạo URL cho blob
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // Tạo thẻ a để trigger download với tên file đúng
+        const a = document.createElement('a');
+        a.href = blobUrl;
+
+        // Đặt tên file: ưu tiên title, fallback về fileName, đảm bảo có .pdf
+        let fileName = doc.title || doc.fileName || 'document';
+        if (!fileName.toLowerCase().endsWith('.pdf')) {
+          fileName += '.pdf';
+        }
+        a.download = fileName;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Giải phóng blob URL
+        window.URL.revokeObjectURL(blobUrl);
+      })
+      .catch(error => {
+        console.error('Download error:', error);
+        alert('Tải tài liệu thất bại!');
+      });
   }
 
   deleteDocument(id: string) {

@@ -66,18 +66,6 @@ interface NavItem {
         }
         }
       </nav>
-      
-      <!-- Progress Summary -->
-      <div class="sidebar__progress">
-        <div class="progress-header">
-          <span>Tiến độ tổng thể</span>
-          <span class="progress-value">0%</span>
-        </div>
-        <div class="progress">
-          <div class="progress__bar" style="width: 0%"></div>
-        </div>
-        <p class="progress-detail">0/12 topics hoàn thành</p>
-      </div>
     </aside>
   `,
   styles: [`
