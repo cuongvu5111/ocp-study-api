@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Flashcard {
-  id: number;
-  topicId: number;
+  id: string;
+  topicId: string;
   topicName: string;
   front: string;
   back: string;

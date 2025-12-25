@@ -31,7 +31,7 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
+// @PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "*")
 public class QuestionAdminController {
 

@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Topic {
-  id: number;
+  id: string;
   name: string;
   description: string;
   icon: string;
@@ -38,7 +38,7 @@ export class TopicListComponent implements OnInit {
 
   loadTopics() {
     this.loading.set(true);
-    const certId = Number(localStorage.getItem('selectedCertificationId'));
+    const certId = localStorage.getItem('selectedCertificationId');
     this.apiService.getTopics(certId || undefined).subscribe({
       next: (data) => {
         // Handle both array and Page object response

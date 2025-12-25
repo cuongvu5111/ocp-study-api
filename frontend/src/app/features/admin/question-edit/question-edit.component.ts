@@ -5,19 +5,19 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Option {
-    key: string;
-    content: string;
-    isCorrect: boolean;
+  key: string;
+  content: string;
+  isCorrect: boolean;
 }
 
 /**
  * Admin component - Form sửa câu hỏi.
  */
 @Component({
-    selector: 'app-question-edit',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterLink],
-    template: `
+  selector: 'app-question-edit',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  template: `
     <div class="admin-container">
       <header class="page-header">
         <a routerLink="/admin/questions" class="btn btn--ghost btn--icon">
@@ -143,7 +143,7 @@ interface Option {
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .admin-container {
       max-width: 800px;
       margin: 0 auto;
@@ -298,112 +298,112 @@ interface Option {
   `]
 })
 export class QuestionEditComponent implements OnInit {
-    private apiService = inject(ApiService);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
+  private apiService = inject(ApiService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-    questionId = 0;
-    topics = signal<any[]>([]);
-    loading = signal(true);
-    saving = signal(false);
-    error = signal<string | null>(null);
-    success = signal<string | null>(null);
+  questionId = '';
+  topics = signal<any[]>([]);
+  loading = signal(true);
+  saving = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
 
-    topicId = '';
-    content = '';
-    codeSnippet = '';
-    difficulty = 2;
-    explanation = '';
-    correctIndex = 0;
+  topicId = '';
+  content = '';
+  codeSnippet = '';
+  difficulty = 2;
+  explanation = '';
+  correctIndex = 0;
 
-    options: Option[] = [
-        { key: 'A', content: '', isCorrect: true },
-        { key: 'B', content: '', isCorrect: false },
-        { key: 'C', content: '', isCorrect: false },
-        { key: 'D', content: '', isCorrect: false },
-    ];
+  options: Option[] = [
+    { key: 'A', content: '', isCorrect: true },
+    { key: 'B', content: '', isCorrect: false },
+    { key: 'C', content: '', isCorrect: false },
+    { key: 'D', content: '', isCorrect: false },
+  ];
 
-    ngOnInit() {
-        this.questionId = Number(this.route.snapshot.paramMap.get('id'));
-        this.loadTopics();
-        this.loadQuestion();
-    }
+  ngOnInit() {
+    this.questionId = this.route.snapshot.paramMap.get('id') || '';
+    this.loadTopics();
+    this.loadQuestion();
+  }
 
-    loadTopics() {
-        this.apiService.getTopics().subscribe({
-            next: (data) => this.topics.set(data),
-            error: (err) => console.error('Error loading topics:', err)
-        });
-    }
+  loadTopics() {
+    this.apiService.getTopics().subscribe({
+      next: (data) => this.topics.set(data),
+      error: (err) => console.error('Error loading topics:', err)
+    });
+  }
 
-    loadQuestion() {
-        this.apiService.getQuestionById(this.questionId).subscribe({
-            next: (data) => {
-                this.topicId = String(data.topicId);
-                this.content = data.content || '';
-                this.codeSnippet = data.codeSnippet || '';
-                this.difficulty = data.difficulty || 2;
-                this.explanation = data.explanation || '';
+  loadQuestion() {
+    this.apiService.getQuestionById(this.questionId).subscribe({
+      next: (data) => {
+        this.topicId = String(data.topicId);
+        this.content = data.content || '';
+        this.codeSnippet = data.codeSnippet || '';
+        this.difficulty = data.difficulty || 2;
+        this.explanation = data.explanation || '';
 
-                // Load options
-                if (data.options && data.options.length === 4) {
-                    this.options = data.options.map((opt: any, i: number) => {
-                        if (opt.isCorrect) this.correctIndex = i;
-                        return {
-                            key: opt.key,
-                            content: opt.content,
-                            isCorrect: opt.isCorrect
-                        };
-                    });
-                }
-
-                this.loading.set(false);
-            },
-            error: (err) => {
-                console.error('Error loading question:', err);
-                this.error.set('Không tìm thấy câu hỏi');
-                this.loading.set(false);
-            }
-        });
-    }
-
-    onSubmit() {
-        if (!this.topicId || !this.content) {
-            this.error.set('Vui lòng điền đầy đủ thông tin');
-            return;
+        // Load options
+        if (data.options && data.options.length === 4) {
+          this.options = data.options.map((opt: any, i: number) => {
+            if (opt.isCorrect) this.correctIndex = i;
+            return {
+              key: opt.key,
+              content: opt.content,
+              isCorrect: opt.isCorrect
+            };
+          });
         }
 
-        if (this.options.some(o => !o.content)) {
-            this.error.set('Vui lòng điền đầy đủ 4 đáp án');
-            return;
-        }
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading question:', err);
+        this.error.set('Không tìm thấy câu hỏi');
+        this.loading.set(false);
+      }
+    });
+  }
 
-        // Set correct answer
-        this.options.forEach((opt, i) => opt.isCorrect = i === this.correctIndex);
-
-        const payload = {
-            topicId: Number(this.topicId),
-            content: this.content,
-            codeSnippet: this.codeSnippet || null,
-            questionType: 'SINGLE_CHOICE',
-            difficulty: this.difficulty,
-            explanation: this.explanation,
-            options: this.options
-        };
-
-        this.saving.set(true);
-        this.error.set(null);
-
-        this.apiService.updateQuestion(this.questionId, payload).subscribe({
-            next: () => {
-                this.saving.set(false);
-                this.success.set('Cập nhật thành công!');
-                setTimeout(() => this.router.navigate(['/admin/questions']), 1500);
-            },
-            error: (err) => {
-                this.saving.set(false);
-                this.error.set(err.error?.message || 'Lỗi khi cập nhật');
-            }
-        });
+  onSubmit() {
+    if (!this.topicId || !this.content) {
+      this.error.set('Vui lòng điền đầy đủ thông tin');
+      return;
     }
+
+    if (this.options.some(o => !o.content)) {
+      this.error.set('Vui lòng điền đầy đủ 4 đáp án');
+      return;
+    }
+
+    // Set correct answer
+    this.options.forEach((opt, i) => opt.isCorrect = i === this.correctIndex);
+
+    const payload = {
+      topicId: this.topicId,
+      content: this.content,
+      codeSnippet: this.codeSnippet || null,
+      questionType: 'SINGLE_CHOICE',
+      difficulty: this.difficulty,
+      explanation: this.explanation,
+      options: this.options
+    };
+
+    this.saving.set(true);
+    this.error.set(null);
+
+    this.apiService.updateQuestion(this.questionId, payload).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.success.set('Cập nhật thành công!');
+        setTimeout(() => this.router.navigate(['/admin/questions']), 1500);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.error.set(err.error?.message || 'Lỗi khi cập nhật');
+      }
+    });
+  }
 }

@@ -4,7 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Topic {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   subtopicCount?: number;

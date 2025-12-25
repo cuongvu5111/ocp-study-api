@@ -5,8 +5,8 @@ import { ApiService } from '../../../core/services/api.service';
 
 // Frontend Question format
 interface Question {
-    id: number;
-    topicId: number;
+    id: string;
+    topicId: string;
     topicName: string;
     question: string;
     options: string[];
@@ -18,11 +18,11 @@ interface Question {
 
 // API Response format
 interface ApiQuestion {
-    id: number;
-    topicId: number;
+    id: string;
+    topicId: string;
     topicName: string;
     content: string;
-    options: { id: number; optionKey: string; content: string; isCorrect: boolean }[];
+    options: { id: string; optionKey: string; content: string; isCorrect: boolean }[];
     explanation?: string;
     codeSnippet?: string;
     difficulty: number;
@@ -85,14 +85,14 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
             this.remainingTime.set(5400);
         }
 
-        this.loadQuestions(topicId ? Number(topicId) : undefined, limit);
+        this.loadQuestions(topicId || undefined, limit);
     }
 
     ngOnDestroy() {
         this.stopTimer();
     }
 
-    loadQuestions(topicId?: number, limit = 10) {
+    loadQuestions(topicId?: string, limit = 10) {
         this.loading.set(true);
         this.apiService.getQuizQuestions(topicId, limit).subscribe({
             next: (data: ApiQuestion[]) => {
@@ -148,8 +148,8 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
     getMockQuestions(): Question[] {
         return [
             {
-                id: 1,
-                topicId: 4,
+                id: '1',
+                topicId: '4',
                 topicName: 'Lambda & Streams',
                 question: 'Functional Interface là gì trong Java?',
                 options: [
@@ -162,8 +162,8 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
                 difficulty: 1
             },
             {
-                id: 2,
-                topicId: 4,
+                id: '2',
+                topicId: '4',
                 topicName: 'Lambda & Streams',
                 question: 'Đoạn code sau sẽ output gì?',
                 codeSnippet: 'List<Integer> nums = Arrays.asList(1, 2, 3);\nnums.stream()\n    .filter(n -> n > 1)\n    .forEach(System.out::println);',
@@ -172,8 +172,8 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
                 difficulty: 2
             },
             {
-                id: 3,
-                topicId: 3,
+                id: '3',
+                topicId: '3',
                 topicName: 'Exceptions',
                 question: 'Checked Exception nào KHÔNG cần khai báo trong throws clause?',
                 options: [
@@ -187,8 +187,8 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
                 difficulty: 2
             },
             {
-                id: 4,
-                topicId: 6,
+                id: '4',
+                topicId: '6',
                 topicName: 'Collections',
                 question: 'HashMap vs TreeMap, cái nào có lookup time O(log n)?',
                 options: [
@@ -201,8 +201,8 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
                 difficulty: 1
             },
             {
-                id: 5,
-                topicId: 8,
+                id: '5',
+                topicId: '8',
                 topicName: 'Concurrency',
                 question: 'Keyword nào đảm bảo visibility giữa các threads?',
                 options: [
@@ -273,7 +273,7 @@ export class QuizSessionComponent implements OnInit, OnDestroy {
 
         const submission = {
             quizType: quizMode === 'mock' ? 'MOCK_EXAM' : quizMode === 'topic' ? 'TOPIC_QUIZ' : 'QUICK_QUIZ',
-            topicId: topicId ? Number(topicId) : null,
+            topicId: topicId ? topicId : null,
             topicName: null, // TODO: get from topic if available
             totalQuestions: this.questions().length,
             correctAnswers: this.correctCount(),

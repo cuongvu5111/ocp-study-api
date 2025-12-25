@@ -5,11 +5,11 @@ import { ApiService } from '../../../core/services/api.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
-    selector: 'app-document-list',
-    standalone: true,
-    imports: [CommonModule],
-    templateUrl: './document-list.component.html',
-    styles: [`
+  selector: 'app-document-list',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './document-list.component.html',
+  styles: [`
     .doc-container {
       padding: 1rem;
       max-width: 1200px;
@@ -105,84 +105,84 @@ import { environment } from '../../../../environments/environment';
   `]
 })
 export class DocumentListComponent implements OnInit {
-    private apiService = inject(ApiService);
-    private certService = inject(CertificationService);
+  private apiService = inject(ApiService);
+  private certService = inject(CertificationService);
 
-    documents = signal<any[]>([]);
-    loading = signal(false);
+  documents = signal<any[]>([]);
+  loading = signal(false);
 
-    apiUrl = environment.apiUrl;
+  apiUrl = environment.apiUrl;
 
-    ngOnInit() {
-        this.certService.selectedCertId$.subscribe(certId => {
-            if (certId) {
-                this.loadDocuments(certId);
-            }
-        });
-    }
+  ngOnInit() {
+    this.certService.selectedCertId$.subscribe(certId => {
+      if (certId) {
+        this.loadDocuments(certId);
+      }
+    });
+  }
 
-    loadDocuments(certId: number) {
-        this.loading.set(true);
-        this.apiService.getDocuments(certId).subscribe({
-            next: (data) => {
-                this.documents.set(data);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                console.error(err);
-                this.loading.set(false);
-            }
-        });
-    }
+  loadDocuments(certId: string) {
+    this.loading.set(true);
+    this.apiService.getDocuments(certId).subscribe({
+      next: (data) => {
+        this.documents.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.loading.set(false);
+      }
+    });
+  }
 
-    onFileSelected(event: any) {
-        const file: File = event.target.files[0];
-        const certId = this.certService.getCurrentCertId();
+  onFileSelected(event: any) {
+    const file: File = event.target.files[0];
+    const certId = this.certService.getCurrentCertId();
 
-        if (file && certId) {
-            if (file.type !== 'application/pdf') {
-                alert('Chỉ upload file PDF!');
-                return;
-            }
+    if (file && certId) {
+      if (file.type !== 'application/pdf') {
+        alert('Chỉ upload file PDF!');
+        return;
+      }
 
-            this.loading.set(true);
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('certificationId', certId.toString());
-            formData.append('title', file.name.replace('.pdf', ''));
+      this.loading.set(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('certificationId', certId);
+      formData.append('title', file.name.replace('.pdf', ''));
 
-            this.apiService.uploadDocument(formData).subscribe({
-                next: (newDoc) => {
-                    this.documents.update(docs => [newDoc, ...docs]);
-                    this.loading.set(false);
-                    alert('Upload thành công!');
-                },
-                error: (err) => {
-                    console.error(err);
-                    this.loading.set(false);
-                    alert('Upload thất bại');
-                }
-            });
+      this.apiService.uploadDocument(formData).subscribe({
+        next: (newDoc) => {
+          this.documents.update(docs => [newDoc, ...docs]);
+          this.loading.set(false);
+          alert('Upload thành công!');
+        },
+        error: (err) => {
+          console.error(err);
+          this.loading.set(false);
+          alert('Upload thất bại');
         }
+      });
     }
+  }
 
-    viewDocument(doc: any) {
-        const url = `${this.apiUrl}/documents/${doc.id}/file`;
-        window.open(url, '_blank');
-    }
+  viewDocument(doc: any) {
+    const url = `${this.apiUrl}/documents/${doc.id}/file`;
+    window.open(url, '_blank');
+  }
 
-    deleteDocument(id: number) {
-        if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
-            this.apiService.deleteDocument(id).subscribe({
-                next: () => {
-                    this.documents.update(docs => docs.filter(d => d.id !== id));
-                },
-                error: () => alert('Xóa thất bại')
-            });
-        }
+  deleteDocument(id: string) {
+    if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+      this.apiService.deleteDocument(id).subscribe({
+        next: () => {
+          this.documents.update(docs => docs.filter(d => d.id !== id));
+        },
+        error: () => alert('Xóa thất bại')
+      });
     }
+  }
 
-    formatDate(dateStr: string): string {
-        return new Date(dateStr).toLocaleDateString('vi-VN');
-    }
+  formatDate(dateStr: string): string {
+    return new Date(dateStr).toLocaleDateString('vi-VN');
+  }
 }

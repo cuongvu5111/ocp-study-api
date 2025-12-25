@@ -175,7 +175,7 @@ export class TopicListComponent implements OnInit {
     totalElements = signal(0);
     totalPages = signal(0);
 
-    selectedCertId: number | null = null;
+    selectedCertId: string | null = null;
 
     ngOnInit() {
         this.loadCertifications();
@@ -213,7 +213,7 @@ export class TopicListComponent implements OnInit {
         this.loadTopics();
     }
 
-    getCertName(id: number) {
+    getCertName(id: string) {
         const cert = this.certifications().find(c => c.id === id);
         return cert ? cert.name : 'Unknown';
     }

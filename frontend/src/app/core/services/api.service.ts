@@ -18,7 +18,7 @@ export class ApiService {
 
     // ==================== TOPICS ====================
 
-    getTopics(certificationId?: number, page?: number, size?: number): Observable<any> {
+    getTopics(certificationId?: string, page?: number, size?: number): Observable<any> {
         let url = `${this.baseUrl}/topics`;
         const params: any = {};
         if (certificationId) params.certificationId = certificationId;
@@ -57,7 +57,7 @@ export class ApiService {
         return this.http.get<any>(`${this.baseUrl}/flashcards`, { params });
     }
 
-    getFlashcardsByTopic(topicId: number, page?: number, size?: number): Observable<any> {
+    getFlashcardsByTopic(topicId: string, page?: number, size?: number): Observable<any> {
         let params: any = {};
         if (page !== undefined) params.page = page;
         if (size !== undefined) params.size = size;
@@ -68,7 +68,7 @@ export class ApiService {
         return this.http.get<any[]>(`${this.baseUrl}/flashcards/review`);
     }
 
-    getFlashcardById(id: number): Observable<any> {
+    getFlashcardById(id: string): Observable<any> {
         return this.http.get<any>(`${this.baseUrl}/flashcards/${id}`);
     }
 
@@ -76,15 +76,14 @@ export class ApiService {
         return this.http.post<any>(`${this.baseUrl}/flashcards`, flashcard);
     }
 
-    updateFlashcard(id: number, flashcard: any): Observable<any> {
+    updateFlashcard(id: string, flashcard: any): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/flashcards/${id}`, flashcard);
     }
-
-    deleteFlashcard(id: number): Observable<void> {
+    deleteFlashcard(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/flashcards/${id}`);
     }
 
-    markFlashcardReviewed(id: number, correct: boolean): Observable<any> {
+    markFlashcardReviewed(id: string, correct: boolean): Observable<any> {
         return this.http.post<any>(`${this.baseUrl}/flashcards/${id}/review?correct=${correct}`, {});
     }
 
@@ -110,7 +109,7 @@ export class ApiService {
 
     // ==================== DASHBOARD ====================
 
-    getDashboard(certificationId?: number): Observable<any> {
+    getDashboard(certificationId?: string): Observable<any> {
         let url = `${this.baseUrl}/dashboard`;
         if (certificationId) {
             url += `?certificationId=${certificationId}`;
@@ -127,7 +126,7 @@ export class ApiService {
 
     // ==================== QUIZ ====================
 
-    getQuizQuestions(topicId?: number, limit: number = 10): Observable<any[]> {
+    getQuizQuestions(topicId?: string, limit: number = 10): Observable<any[]> {
         let url = `${this.baseUrl}/quiz/questions?limit=${limit}`;
         if (topicId) {
             url += `&topicId=${topicId}`;
@@ -152,7 +151,7 @@ export class ApiService {
         return this.http.get<any>(`${this.baseUrl}/admin/questions`, { params });
     }
 
-    getQuestionById(id: number): Observable<any> {
+    getQuestionById(id: string): Observable<any> {
         return this.http.get<any>(`${this.baseUrl}/admin/questions/${id}`);
     }
 
@@ -160,11 +159,11 @@ export class ApiService {
         return this.http.post<any>(`${this.baseUrl}/admin/questions`, data);
     }
 
-    updateQuestion(id: number, data: any): Observable<any> {
+    updateQuestion(id: string, data: any): Observable<any> {
         return this.http.put<any>(`${this.baseUrl}/admin/questions/${id}`, data);
     }
 
-    deleteQuestion(id: number): Observable<void> {
+    deleteQuestion(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/admin/questions/${id}`);
     }
 
@@ -174,7 +173,7 @@ export class ApiService {
 
     // ==================== DOCUMENTS ====================
 
-    getDocuments(certificationId: number): Observable<any[]> {
+    getDocuments(certificationId: string): Observable<any[]> {
         return this.http.get<any[]>(`${this.baseUrl}/documents?certificationId=${certificationId}`);
     }
 
@@ -182,7 +181,7 @@ export class ApiService {
         return this.http.post<any>(`${this.baseUrl}/documents`, formData);
     }
 
-    deleteDocument(id: number): Observable<void> {
+    deleteDocument(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/documents/${id}`);
     }
 }

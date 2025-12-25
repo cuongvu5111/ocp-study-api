@@ -308,7 +308,7 @@ export class QuestionCreateComponent implements OnInit {
   error = signal<string | null>(null);
   success = signal<string | null>(null);
 
-  selectedCertId: number | null = null;
+  selectedCertId: string | null = null;
   topicId = '';
   content = '';
   codeSnippet = '';
@@ -342,7 +342,7 @@ export class QuestionCreateComponent implements OnInit {
     }
   }
 
-  loadTopics(certId: number) {
+  loadTopics(certId: string) {
     this.apiService.getTopics(certId).subscribe({
       next: (data) => this.topics.set(data),
       error: (err) => console.error('Error loading topics:', err)
@@ -365,7 +365,7 @@ export class QuestionCreateComponent implements OnInit {
     this.options.forEach((opt, i) => opt.isCorrect = i === this.correctIndex);
 
     const payload = {
-      topicId: Number(this.topicId),
+      topicId: this.topicId,
       content: this.content,
       codeSnippet: this.codeSnippet || null,
       questionType: 'SINGLE_CHOICE',

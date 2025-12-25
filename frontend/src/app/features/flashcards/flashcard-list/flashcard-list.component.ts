@@ -5,10 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 
 interface Flashcard {
-  id: number;
-  topicId: number;
+  id: string;
+  topicId: string;
   topicName: string;
-  subtopicId?: number;
+  subtopicId?: string;
   subtopicName?: string;
   front: string;
   back: string;
@@ -20,7 +20,7 @@ interface Flashcard {
 }
 
 interface Topic {
-  id: number;
+  id: string;
   name: string;
   icon: string;
 }
@@ -145,7 +145,7 @@ export class FlashcardListComponent implements OnInit {
     this.errorMessage.set('');
 
     const flashcard = {
-      topicId: Number(this.newFlashcard.topicId),
+      topicId: this.newFlashcard.topicId,
       front: this.newFlashcard.front,
       back: this.newFlashcard.back,
       codeExample: this.newFlashcard.codeExample || undefined

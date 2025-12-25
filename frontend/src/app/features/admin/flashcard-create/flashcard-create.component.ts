@@ -129,9 +129,9 @@ export class FlashcardCreateComponent implements OnInit {
   certifications = signal<any[]>([]);
   topics = signal<any[]>([]);
 
-  selectedCertId: number | null = null;
-  topicId: number | null = null;
-  flashcardId: number | null = null; // Track current flashcard ID
+  selectedCertId: string | null = null;
+  topicId: string | null = null;
+  flashcardId: string | null = null; // Track current flashcard ID
   isEditMode = signal(false);
 
   front = '';
@@ -147,7 +147,7 @@ export class FlashcardCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode.set(true);
-      this.flashcardId = Number(id);
+      this.flashcardId = id;
       this.loadFlashcard(this.flashcardId);
     }
   }
@@ -161,7 +161,7 @@ export class FlashcardCreateComponent implements OnInit {
     });
   }
 
-  loadFlashcard(id: number) {
+  loadFlashcard(id: string) {
     this.loading.set(true);
     this.apiService.getFlashcardById(id).subscribe({
       next: (data: any) => {
@@ -199,7 +199,7 @@ export class FlashcardCreateComponent implements OnInit {
     }
   }
 
-  loadTopics(certId: number) {
+  loadTopics(certId: string) {
     this.apiService.getTopics(certId).subscribe({
       next: (data) => this.topics.set(data),
       error: (err) => console.error('Error loading topics:', err)
@@ -213,7 +213,7 @@ export class FlashcardCreateComponent implements OnInit {
     }
 
     const payload = {
-      topicId: Number(this.topicId),
+      topicId: this.topicId,
       front: this.front,
       back: this.back,
       codeExample: this.codeExample || null

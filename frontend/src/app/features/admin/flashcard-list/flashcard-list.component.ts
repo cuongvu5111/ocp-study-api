@@ -204,8 +204,8 @@ export class FlashcardListComponent implements OnInit {
 
     loading = signal(false);
 
-    selectedCertId: number | null = null;
-    selectedTopicId: number | null = null;
+    selectedCertId: string | null = null;
+    selectedTopicId: string | null = null;
 
     // Pagination
     currentPage = signal(0);
@@ -281,7 +281,7 @@ export class FlashcardListComponent implements OnInit {
         this.loadFlashcards();
     }
 
-    deleteFlashcard(id: number) {
+    deleteFlashcard(id: string) {
         if (confirm('Bạn có chắc chắn muốn xóa flashcard này?')) {
             this.apiService.deleteFlashcard(id).subscribe(() => this.loadFlashcards());
         }

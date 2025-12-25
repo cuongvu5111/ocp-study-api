@@ -167,7 +167,7 @@ export class CertificationCreateComponent implements OnInit {
 
   // Edit mode
   isEditMode = signal(false);
-  certId = signal<number | null>(null);
+  certId = signal<string | null>(null);
 
   // Constants
   readonly icons = [
@@ -204,8 +204,8 @@ export class CertificationCreateComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode.set(true);
-      this.certId.set(Number(id));
-      this.loadCertification(Number(id));
+      this.certId.set(id);
+      this.loadCertification(id);
     } else {
       // Initialize with one topic if new
       this.addTopic(1);
@@ -236,7 +236,7 @@ export class CertificationCreateComponent implements OnInit {
     }
   }
 
-  loadCertification(id: number) {
+  loadCertification(id: string) {
     this.loading.set(true);
     this.certService.getCertificationById(id).subscribe({
       next: (cert: any) => { // Use specific type if available

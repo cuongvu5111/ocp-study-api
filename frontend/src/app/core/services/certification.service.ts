@@ -16,8 +16,8 @@ export class CertificationService {
     );
     selectedCertName$ = this.selectedCertNameSubject.asObservable();
 
-    private selectedCertIdSubject = new BehaviorSubject<number | null>(
-        Number(localStorage.getItem('selectedCertificationId')) || null
+    private selectedCertIdSubject = new BehaviorSubject<string | null>(
+        localStorage.getItem('selectedCertificationId') || null
     );
     selectedCertId$ = this.selectedCertIdSubject.asObservable();
 
@@ -30,7 +30,7 @@ export class CertificationService {
         return this.http.get<any>(this.apiUrl, { params });
     }
 
-    getCertificationById(id: number): Observable<Certification> {
+    getCertificationById(id: string): Observable<Certification> {
         return this.http.get<Certification>(`${this.apiUrl}/${id}`);
     }
 
@@ -38,11 +38,11 @@ export class CertificationService {
         return this.http.post<Certification>(this.apiUrl, data);
     }
 
-    updateCertification(id: number, data: any): Observable<Certification> {
+    updateCertification(id: string, data: any): Observable<Certification> {
         return this.http.put<Certification>(`${this.apiUrl}/${id}`, data);
     }
 
-    deleteCertification(id: number): Observable<void> {
+    deleteCertification(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
@@ -51,12 +51,12 @@ export class CertificationService {
         this.selectedCertNameSubject.next(name);
     }
 
-    setSelectedCertificationId(id: number) {
-        localStorage.setItem('selectedCertificationId', id.toString());
+    setSelectedCertificationId(id: string) {
+        localStorage.setItem('selectedCertificationId', id);
         this.selectedCertIdSubject.next(id);
     }
 
-    getCurrentCertId(): number | null {
+    getCurrentCertId(): string | null {
         return this.selectedCertIdSubject.value;
     }
 }

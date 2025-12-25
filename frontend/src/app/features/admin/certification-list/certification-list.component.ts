@@ -231,7 +231,7 @@ export class CertificationListComponent implements OnInit {
     this.loadData();
   }
 
-  deleteCert(id: number) {
+  deleteCert(id: string) {
     if (confirm('Bạn có chắc muốn xóa chứng chỉ này? Tất cả Topics, Questions, Flashcards liên quan sẽ bị xóa!')) {
       this.certService.deleteCertification(id).subscribe({
         next: () => this.loadData(),

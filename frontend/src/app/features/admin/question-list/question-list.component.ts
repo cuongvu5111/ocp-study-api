@@ -360,7 +360,7 @@ export class QuestionListComponent implements OnInit {
     return topicIds.size;
   }
 
-  deleteQuestion(id: number) {
+  deleteQuestion(id: string) {
     if (!confirm('Bạn có chắc muốn xóa câu hỏi này?')) return;
 
     this.apiService.deleteQuestion(id).subscribe({

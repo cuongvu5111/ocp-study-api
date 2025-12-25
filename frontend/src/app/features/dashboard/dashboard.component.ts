@@ -81,7 +81,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadDashboardData() {
-    const certId = Number(localStorage.getItem('selectedCertificationId'));
+    const certId = localStorage.getItem('selectedCertificationId');
     const certName = localStorage.getItem('selectedCertificationName');
     if (certName) {
       this.selectedCertName.set(certName);
