@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @RestController
-@RequestMapping("/api/quiz")
+@RequestMapping("/quiz")
 @CrossOrigin(origins = "*")
 public class QuizController {
 

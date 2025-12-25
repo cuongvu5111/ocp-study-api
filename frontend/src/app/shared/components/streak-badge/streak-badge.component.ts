@@ -6,10 +6,10 @@ import { StreakService, StreakData, DailyActivity } from '../../../core/services
  * Component hiển thị Study Streak badge trong header
  */
 @Component({
-    selector: 'app-streak-badge',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-streak-badge',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <div class="streak-container" (click)="toggleDropdown()">
       <!-- Badge -->
       <div class="streak-badge" [class]="getStreakClass()">
@@ -63,7 +63,7 @@ import { StreakService, StreakData, DailyActivity } from '../../../core/services
 
             <!-- 7-Day Calendar -->
             <div class="calendar-section">
-              <h4>7 ngày gần nhất</h4>
+              <h4>Tuần này</h4>
               <div class="calendar-grid">
                 @for (day of data.last7Days; track day.date) {
                   <div class="day-cell" [class.active]="day.hasActivity" [class.today]="isToday(day.date)">
@@ -94,7 +94,7 @@ import { StreakService, StreakData, DailyActivity } from '../../../core/services
       }
     </div>
   `,
-    styles: [`
+  styles: [`
     .streak-container {
       position: relative;
       cursor: pointer;
@@ -134,7 +134,6 @@ import { StreakService, StreakData, DailyActivity } from '../../../core/services
       right: 0;
       width: 400px;
       max-height: 600px;
-      overflow-y: auto;
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
@@ -352,58 +351,58 @@ import { StreakService, StreakData, DailyActivity } from '../../../core/services
   `]
 })
 export class StreakBadgeComponent implements OnInit {
-    private streakService = inject(StreakService);
+  private streakService = inject(StreakService);
 
-    streakData = signal<StreakData | null>(null);
-    dropdownOpen = signal(false);
-    loading = signal(false);
+  streakData = signal<StreakData | null>(null);
+  dropdownOpen = signal(false);
+  loading = signal(false);
 
-    ngOnInit() {
-        this.loadStreak();
-    }
+  ngOnInit() {
+    this.loadStreak();
+  }
 
-    loadStreak() {
-        this.loading.set(true);
-        this.streakService.getStreak().subscribe({
-            next: (data) => {
-                this.streakData.set(data);
-                this.loading.set(false);
-            },
-            error: (err) => {
-                console.error('Failed to load streak:', err);
-                this.loading.set(false);
-            }
-        });
-    }
+  loadStreak() {
+    this.loading.set(true);
+    this.streakService.getStreak().subscribe({
+      next: (data) => {
+        this.streakData.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load streak:', err);
+        this.loading.set(false);
+      }
+    });
+  }
 
-    toggleDropdown() {
-        this.dropdownOpen.update(v => !v);
-    }
+  toggleDropdown() {
+    this.dropdownOpen.update(v => !v);
+  }
 
-    getStreakClass(): string {
-        const streak = this.streakData()?.currentStreak || 0;
-        if (streak >= 15) return 'level-4';
-        if (streak >= 8) return 'level-3';
-        if (streak >= 4) return 'level-2';
-        return 'level-1';
-    }
+  getStreakClass(): string {
+    const streak = this.streakData()?.currentStreak || 0;
+    if (streak >= 15) return 'level-4';
+    if (streak >= 8) return 'level-3';
+    if (streak >= 4) return 'level-2';
+    return 'level-1';
+  }
 
-    getProgressPercentage(minutes: number): number {
-        const goal = 30; // Daily goal: 30 minutes
-        return Math.min((minutes / goal) * 100, 100);
-    }
+  getProgressPercentage(minutes: number): number {
+    const goal = 30; // Daily goal: 30 minutes
+    return Math.min((minutes / goal) * 100, 100);
+  }
 
-    isToday(dateStr: string): boolean {
-        const today = new Date().toISOString().split('T')[0];
-        return dateStr === today;
-    }
+  isToday(dateStr: string): boolean {
+    const today = new Date().toISOString().split('T')[0];
+    return dateStr === today;
+  }
 
-    getMotivationMessage(streak: number): string {
-        if (streak === 0) return '💪 Bắt đầu streak của bạn hôm nay!';
-        if (streak < 3) return '🌱 Bắt đầu tốt! Tiếp tục duy trì!';
-        if (streak < 7) return '🔥 Tuyệt vời! Đang xây dựng thói quen!';
-        if (streak < 14) return '⭐ Xuất sắc! Streak 1 tuần!';
-        if (streak < 30) return '🏆 Phi thường! Bạn là huyền thoại!';
-        return '👑 VUA STREAK! Không ai có thể ngăn bạn!';
-    }
+  getMotivationMessage(streak: number): string {
+    if (streak === 0) return '💪 Bắt đầu streak của bạn hôm nay!';
+    if (streak < 3) return '🌱 Bắt đầu tốt! Tiếp tục duy trì!';
+    if (streak < 7) return '🔥 Tuyệt vời! Đang xây dựng thói quen!';
+    if (streak < 14) return '⭐ Xuất sắc! Streak 1 tuần!';
+    if (streak < 30) return '🏆 Phi thường! Bạn là huyền thoại!';
+    return '👑 VUA STREAK! Không ai có thể ngăn bạn!';
+  }
 }

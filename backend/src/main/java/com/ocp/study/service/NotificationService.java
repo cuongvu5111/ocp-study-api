@@ -32,6 +32,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     /**
      * Tạo notification mới
@@ -54,6 +55,9 @@ public class NotificationService {
 
         notification = notificationRepository.save(notification);
         log.info("Created notification {} for user {}", type, userId);
+
+        // Gửi email kèm theo notification
+        emailService.sendNotificationEmail(user, title, message);
 
         return notification;
     }

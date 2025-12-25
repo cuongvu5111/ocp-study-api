@@ -8,6 +8,7 @@ import com.ocp.study.entity.QuizHistory;
 import com.ocp.study.repository.QuestionRepository;
 import com.ocp.study.repository.QuizHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,11 +24,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class QuizService {
 
     private final QuestionRepository questionRepository;
     private final QuizHistoryRepository quizHistoryRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     /**
      * Lấy câu hỏi ngẫu nhiên cho quiz
@@ -103,7 +106,52 @@ public class QuizService {
                 .timeSpent(submission.getTimeSpent())
                 .build();
 
-        return quizHistoryRepository.save(history);
+        QuizHistory saved = quizHistoryRepository.save(history);
+
+        // Tạo achievement notification nếu điểm >= 80%
+        if (submission.getScorePercentage() >= 80) {
+            try {
+                String achievementName = getAchievementTitle(submission.getScorePercentage());
+                String description = String.format(
+                        "Bạn đạt %d%% trong quiz %s. %s",
+                        submission.getScorePercentage(),
+                        submission.getTopicName() != null ? submission.getTopicName() : "Mixed",
+                        getMotivationalMessage(submission.getScorePercentage()));
+
+                notificationService.generateAchievement(
+                        userService.getCurrentUser().getId(),
+                        achievementName,
+                        description);
+                log.info("Created achievement notification for user with score {}%",
+                        submission.getScorePercentage());
+            } catch (Exception e) {
+                log.error("Failed to create achievement notification: {}", e.getMessage());
+            }
+        }
+
+        return saved;
+    }
+
+    /**
+     * Lấy title achievement dựa trên điểm số
+     */
+    private String getAchievementTitle(int scorePercentage) {
+        if (scorePercentage == 100)
+            return "Hoàn hảo! 💯";
+        if (scorePercentage >= 90)
+            return "Xuất sắc! ⭐";
+        return "Giỏi lắm! 🎯";
+    }
+
+    /**
+     * Lấy message động viên dựa trên điểm số
+     */
+    private String getMotivationalMessage(int scorePercentage) {
+        if (scorePercentage == 100)
+            return "Bạn là thiên tài!";
+        if (scorePercentage >= 90)
+            return "Tiếp tục phát huy!";
+        return "Cố gắng thêm để đạt 100%!";
     }
 
     /**

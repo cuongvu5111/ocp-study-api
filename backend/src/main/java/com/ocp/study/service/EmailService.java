@@ -32,6 +32,9 @@ public class EmailService {
     @Value("${email.from}")
     private String fromEmail;
 
+    @Value("${email.subject-prefix:OCP Study}")
+    private String subjectPrefix;
+
     @Value("${email.enabled:false}")
     private boolean emailEnabled;
 
@@ -44,7 +47,7 @@ public class EmailService {
         }
 
         try {
-            String subject = "📊 Daily Study Digest - OCP Study";
+            String subject = String.format("📊 Daily Study Digest - %s", subjectPrefix);
             String htmlContent = buildEmailFromTemplate("email/daily-digest", Map.of(
                     "username", user.getUsername(),
                     "flashcardsReviewed", stats.getOrDefault("flashcardsReviewed", 0),
@@ -68,7 +71,7 @@ public class EmailService {
         }
 
         try {
-            String subject = "⏰ Study Reminder - OCP Study";
+            String subject = String.format("⏰ Study Reminder - %s", subjectPrefix);
             String htmlContent = buildEmailFromTemplate("email/study-reminder", Map.of(
                     "username", user.getUsername(),
                     "dashboardUrl", "http://localhost:4200/dashboard",
@@ -87,7 +90,32 @@ public class EmailService {
         String htmlContent = buildEmailFromTemplate("email/test", Map.of(
                 "message", "Email configuration is working correctly!"));
 
-        sendHtmlEmail(toEmail, "🧪 Test Email - OCP Study", htmlContent);
+        sendHtmlEmail(toEmail, String.format("🧪 Test Email - %s", subjectPrefix), htmlContent);
+    }
+
+    /**
+     * Gửi email thông báo chung.
+     */
+    public void sendNotificationEmail(User user, String title, String message) {
+        if (!emailEnabled || !user.getEmailEnabled()) {
+            return;
+        }
+
+        try {
+            String subject = String.format("%s - %s", title, subjectPrefix);
+            // Sử dụng template chung cho notification hoặc tạo mới nếu cần
+            // Ở đây tôi dùng Map để truyền dữ liệu vào template
+            String htmlContent = buildEmailFromTemplate("email/notification", Map.of(
+                    "username", user.getUsername(),
+                    "title", title,
+                    "message", message,
+                    "dashboardUrl", "http://localhost:4200/dashboard"));
+
+            sendHtmlEmail(user.getEmail(), subject, htmlContent);
+            System.out.println("📧 Notification email sent to " + user.getEmail());
+        } catch (Exception e) {
+            System.err.println("Failed to send notification email to " + user.getEmail() + ": " + e.getMessage());
+        }
     }
 
     /**

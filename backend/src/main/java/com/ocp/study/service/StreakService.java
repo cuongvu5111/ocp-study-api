@@ -49,8 +49,8 @@ public class StreakService {
         // Lấy số phút học hôm nay
         Integer minutesToday = studySessionRepository.getTotalMinutesForDate(userId, today);
 
-        // Lấy hoạt động 7 ngày gần nhất
-        List<DailyActivityDTO> last7Days = getDailyActivities(userId, 7);
+        // Lấy hoạt động của tuần hiện tại (Thứ 2 -> Chủ nhật)
+        List<DailyActivityDTO> last7Days = getCurrentWeekActivities(userId);
 
         // Tổng số ngày đã học
         long totalDaysStudied = studySessionRepository.countByUserId(userId);
@@ -132,6 +132,53 @@ public class StreakService {
         }
 
         return maxStreak;
+    }
+
+    /**
+     * Lấy thông tin hoạt động trong tuần hiện tại (Thứ 2 đến Chủ nhật)
+     */
+    public List<DailyActivityDTO> getCurrentWeekActivities(String userId) {
+        LocalDate today = LocalDate.now();
+        // Tìm ngày Thứ 2 của tuần hiện tại
+        LocalDate monday = today.with(java.time.DayOfWeek.MONDAY);
+        LocalDate sunday = monday.plusDays(6);
+
+        // Lấy sessions trong khoảng thời gian từ Thứ 2 đến Chủ Nhật của tuần này
+        List<StudySession> sessions = studySessionRepository.findByUserIdAndStudyDateBetweenOrderByStudyDateAsc(
+                userId, monday, sunday);
+
+        // Map sessions theo ngày
+        Map<LocalDate, StudySession> sessionMap = sessions.stream()
+                .collect(Collectors.toMap(StudySession::getStudyDate, s -> s));
+
+        // Tạo list cho 7 ngày của tuần (Thứ 2 -> Chủ Nhật)
+        List<DailyActivityDTO> activities = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = monday.plusDays(i);
+            StudySession session = sessionMap.get(date);
+
+            if (session != null) {
+                activities.add(DailyActivityDTO.builder()
+                        .date(date)
+                        .minutesStudied(session.getMinutesStudied())
+                        .flashcardsReviewed(session.getFlashcardsReviewed())
+                        .questionsAnswered(session.getQuestionsAnswered())
+                        .hasActivity(true)
+                        .dayOfWeek(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+                        .build());
+            } else {
+                activities.add(DailyActivityDTO.builder()
+                        .date(date)
+                        .minutesStudied(0)
+                        .flashcardsReviewed(0)
+                        .questionsAnswered(0)
+                        .hasActivity(false)
+                        .dayOfWeek(date.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH))
+                        .build());
+            }
+        }
+
+        return activities;
     }
 
     /**

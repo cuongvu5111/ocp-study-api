@@ -18,7 +18,7 @@ import java.util.List;
  * @since 1.0.0
  */
 @RestController
-@RequestMapping("/api/streak")
+@RequestMapping("/streak")
 @RequiredArgsConstructor
 @Tag(name = "Streak", description = "Study Streak APIs")
 public class StreakController {
