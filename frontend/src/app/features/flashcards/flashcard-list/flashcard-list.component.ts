@@ -65,7 +65,9 @@ export class FlashcardListComponent implements OnInit {
     this.loading.set(true);
     this.apiService.getFlashcards().subscribe({
       next: (data) => {
-        this.flashcards.set(data);
+        // Handle both array and Page object response
+        const flashcards = Array.isArray(data) ? data : (data.content || []);
+        this.flashcards.set(flashcards);
         this.loading.set(false);
       },
       error: (err) => {
@@ -78,7 +80,9 @@ export class FlashcardListComponent implements OnInit {
   loadTopics() {
     this.apiService.getTopics().subscribe({
       next: (data) => {
-        this.topics.set(data);
+        // Handle both array and Page object response
+        const topics = Array.isArray(data) ? data : (data.content || []);
+        this.topics.set(topics);
       },
       error: (err) => {
         console.error('Error loading topics:', err);
@@ -86,9 +90,16 @@ export class FlashcardListComponent implements OnInit {
     });
   }
 
-  totalCards = () => this.flashcards().length;
+  totalCards = () => {
+    const cards = this.flashcards();
+    return Array.isArray(cards) ? cards.length : 0;
+  };
   dueCount = () => 0; // TODO: Calculate from backend
-  masteredCount = () => this.flashcards().filter(f => f.reviewCount > 0 && f.correctCount / f.reviewCount > 0.8).length;
+  masteredCount = () => {
+    const cards = this.flashcards();
+    if (!Array.isArray(cards)) return 0;
+    return cards.filter(f => f.reviewCount > 0 && f.correctCount / f.reviewCount > 0.8).length;
+  };
 
   // Detail Modal
   viewCard(card: Flashcard) {

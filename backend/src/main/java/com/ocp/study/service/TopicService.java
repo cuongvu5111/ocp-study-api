@@ -111,7 +111,7 @@ public class TopicService {
                                 .count();
 
                 double progressPercentage = totalSubtopics > 0
-                                ? (double) completedSubtopics / totalSubtopics * 100
+                                ? Math.round((double) completedSubtopics / totalSubtopics * 1000.0) / 10.0
                                 : 0;
 
                 return TopicDTO.builder()

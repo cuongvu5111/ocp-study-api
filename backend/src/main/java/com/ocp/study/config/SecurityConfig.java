@@ -40,24 +40,8 @@ public class SecurityConfig {
                 }) // Use CorsConfig
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - no authentication required
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/topics/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/quiz/questions/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/quiz/questions").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/flashcards/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/dashboard/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/progress/**").permitAll()
-                        .requestMatchers("/quiz/submit", "/quiz/history").permitAll()
-                        .requestMatchers("/streak/**").permitAll()
-                        .requestMatchers("/notifications/**").permitAll()
-                        // Admin only endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        // All other requests need authentication
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        // Allow everything in development
+                        .anyRequest().permitAll());
 
         return http.build();
     }
