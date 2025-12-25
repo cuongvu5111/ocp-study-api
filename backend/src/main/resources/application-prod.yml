@@ -1,0 +1,82 @@
+# Production Configuration for Railway
+# All sensitive values are loaded from environment variables
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: ocp-study-api
+  
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  
+  # Database - Railway PostgreSQL provides DATABASE_URL
+  datasource:
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+  
+  # JPA/Hibernate Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  
+  # Email Configuration
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+# Logging - less verbose in production
+logging:
+  level:
+    root: INFO
+    com.ocp.study: INFO
+    org.hibernate.SQL: WARN
+
+# CORS Configuration - Allow Railway domains
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:https://*.railway.app,https://*.up.railway.app}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+    allowed-headers: "*"
+    max-age: 3600
+
+# JWT Configuration - MUST be set via environment variable
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+# Email Settings
+email:
+  from: ${MAIL_FROM:noreply@ocpstudy.app}
+  subject-prefix: OCP Study
+  enabled: ${EMAIL_ENABLED:false}

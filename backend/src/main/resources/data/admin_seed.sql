@@ -4,7 +4,7 @@ INSERT INTO users (username, full_name, password, email, role, email_enabled, da
 VALUES (
     'admin',
     'Administrator',
-    '$2a$12$LQv3c1yqBWVY0MfqJ1qQO.9xUj0v8nqO1qSzTm.H8gGN9jZmHxCGy',
+    '$2a$12$QBz0hUf3jFNDyXyEzLsUXuIP1cO6PgJNteDB7qyX.n6/ImnSE2ySq',
     'admin@ocp.local',
     'ADMIN',
     true,
