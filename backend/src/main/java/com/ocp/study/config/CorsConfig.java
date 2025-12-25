@@ -47,6 +47,9 @@ public class CorsConfig {
         // Cho phép credentials (cookies, authorization headers)
         config.setAllowCredentials(true);
 
+        // Expose headers (để frontend/browser có thể đọc được tên file)
+        config.setExposedHeaders(List.of("Content-Disposition"));
+
         // Cache preflight response
         config.setMaxAge(maxAge);
 

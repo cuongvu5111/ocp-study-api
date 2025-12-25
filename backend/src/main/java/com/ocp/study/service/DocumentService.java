@@ -1,5 +1,6 @@
 package com.ocp.study.service;
 
+import com.ocp.study.dto.DocumentDTO;
 import com.ocp.study.entity.Certification;
 import com.ocp.study.entity.Document;
 import com.ocp.study.repository.CertificationRepository;
@@ -39,12 +40,15 @@ public class DocumentService {
     }
 
     @Transactional(readOnly = true)
-    public List<Document> getDocumentsByCertification(UUID certificationId) {
-        return documentRepository.findByCertificationIdOrderByUploadedAtDesc(certificationId);
+    public List<DocumentDTO> getDocumentsByCertification(UUID certificationId) {
+        return documentRepository.findByCertificationIdOrderByUploadedAtDesc(certificationId)
+                .stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Transactional
-    public Document storeFile(MultipartFile file, UUID certificationId, String title, String username) {
+    public DocumentDTO storeFile(MultipartFile file, UUID certificationId, String title, String username) {
         // Validate file type
         if (!"application/pdf".equals(file.getContentType())) {
             throw new RuntimeException("Chỉ chấp nhận file PDF.");
@@ -85,15 +89,26 @@ public class DocumentService {
                     .uploadedBy(username)
                     .build();
 
-            return documentRepository.save(document);
+            return convertToDTO(documentRepository.save(document));
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file " + originalFileName + ". Please try again!", ex);
         }
     }
 
+    private DocumentDTO convertToDTO(Document document) {
+        return DocumentDTO.builder()
+                .id(document.getId())
+                .title(document.getTitle())
+                .fileName(document.getFileName())
+                .fileSize(document.getFileSize())
+                .certificationId(document.getCertification().getId())
+                .uploadedAt(document.getUploadedAt())
+                .uploadedBy(document.getUploadedBy())
+                .build();
+    }
+
     public Resource loadFileAsResource(UUID documentId) {
-        Document document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found " + documentId));
+        Document document = getDocumentEntity(documentId);
 
         try {
             Path filePath = this.fileStorageLocation.resolve(document.getFilePath()).normalize();
@@ -106,6 +121,11 @@ public class DocumentService {
         } catch (MalformedURLException ex) {
             throw new RuntimeException("File not found " + document.getFilePath(), ex);
         }
+    }
+
+    public Document getDocumentEntity(UUID documentId) {
+        return documentRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found " + documentId));
     }
 
     @Transactional

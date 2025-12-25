@@ -1,43 +1,93 @@
 <div class="doc-container">
     <div class="header">
-        <h1>📚 Tài liệu học tập</h1>
-        <div class="btn btn-primary upload-btn">
-            <span class="material-icons-outlined">upload_file</span> Upload PDF
+        <div class="header-title">
+            <span class="material-icons-outlined">library_books</span>
+            <h1>Tài liệu học tập</h1>
+        </div>
+
+        <div class="btn btn--primary upload-btn">
+            <span class="material-icons-outlined">upload_file</span>
+            <span>Upload PDF</span>
             <input type="file" accept="application/pdf" class="upload-input" (change)="onFileSelected($event)">
         </div>
     </div>
 
     @if (loading()) {
-    <div class="loading">Loading...</div>
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Đang tải danh sách tài liệu...</p>
+    </div>
+    } @else {
+    <div class="table-card">
+        <table class="doc-list">
+            <thead>
+                <tr>
+                    <th class="col-icon">#</th>
+                    <th class="col-title">Tên tài liệu</th>
+                    <th class="col-date">Ngày tải</th>
+                    <th class="col-size">Dung lượng</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (doc of documents(); track doc.id) {
+                <tr>
+                    <td class="col-icon">
+                        <span class="material-icons-outlined pdf-icon">picture_as_pdf</span>
+                    </td>
+                    <td class="col-title">
+                        <div class="title-text" [title]="doc.title">{{ doc.title }}</div>
+                    </td>
+                    <td class="col-date">{{ formatDate(doc.uploadedAt) }}</td>
+                    <td class="col-size">{{ (doc.fileSize / 1024 / 1024).toFixed(2) }} MB</td>
+                    <td class="col-actions">
+                        <div class="action-group">
+                            <button class="btn btn--icon btn--ghost" (click)="viewDocument(doc)" title="Xem">
+                                <span class="material-icons-outlined">visibility</span>
+                            </button>
+                            <button class="btn btn--icon btn--ghost" (click)="downloadDocument(doc)" title="Tải về">
+                                <span class="material-icons-outlined">download</span>
+                            </button>
+                            <button class="btn btn--icon btn--danger-ghost" (click)="deleteDocument(doc.id)"
+                                title="Xóa">
+                                <span class="material-icons-outlined">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+                @empty {
+                <tr>
+                    <td colspan="5" class="empty-row">
+                        <div class="empty-state">
+                            <span class="material-icons-outlined">article</span>
+                            <p>Chưa có tài liệu nào cho chứng chỉ này.</p>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
     }
 
-    <div class="doc-grid">
-        @for (doc of documents(); track doc.id) {
-        <div class="doc-card">
-            <div class="doc-icon">
-                <span class="material-icons-outlined">picture_as_pdf</span>
-            </div>
-            <div class="doc-info">
-                <h3 [title]="doc.title">{{ doc.title }}</h3>
-                <div class="meta">
-                    <div>{{ formatDate(doc.uploadedAt) }}</div>
-                    <div>{{ (doc.fileSize / 1024 / 1024).toFixed(2) }} MB</div>
+    <!-- PDF Preview Modal -->
+    @if (showPreview()) {
+    <div class="preview-modal" (click)="closePreview()">
+        <div class="preview-container" (click)="$event.stopPropagation()">
+            <div class="preview-header">
+                <div class="title">
+                    <span class="material-icons-outlined">picture_as_pdf</span>
+                    <h3>{{ previewTitle() }}</h3>
                 </div>
-            </div>
-            <div class="doc-actions">
-                <button class="btn btn-sm btn-outline" (click)="viewDocument(doc)">
-                    Xem
-                </button>
-                <button class="btn btn-sm btn-danger icon-only" (click)="deleteDocument(doc.id)">
-                    <span class="material-icons-outlined">delete</span>
+                <button class="btn btn--icon btn--ghost btn-close" (click)="closePreview()">
+                    <span class="material-icons-outlined">close</span>
                 </button>
             </div>
+            <div class="preview-body">
+                <iframe [src]="previewUrl()" type="application/pdf"></iframe>
+            </div>
         </div>
-        }
-        @empty {
-        <div class="empty-state" *ngIf="!loading()">
-            <p>Chưa có tài liệu nào.</p>
-        </div>
-        }
     </div>
+    }
 </div>

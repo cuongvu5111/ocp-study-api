@@ -184,4 +184,8 @@ export class ApiService {
     deleteDocument(id: string): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/documents/${id}`);
     }
+
+    downloadDocument(docId: string): string {
+        return `${this.baseUrl}/documents/${docId}/file?download=true`;
+    }
 }

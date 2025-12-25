@@ -9,6 +9,11 @@ spring:
   application:
     name: ocp-study-api
   
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  
   # Database Configuration
   datasource:
     url: jdbc:postgresql://localhost:5432/ocp_study

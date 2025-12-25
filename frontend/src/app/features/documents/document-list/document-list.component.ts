@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CertificationService } from '../../../core/services/certification.service';
 import { ApiService } from '../../../core/services/api.service';
 import { environment } from '../../../../environments/environment';
@@ -11,7 +12,7 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './document-list.component.html',
   styles: [`
     .doc-container {
-      padding: 1rem;
+      padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -21,11 +22,29 @@ import { environment } from '../../../../environments/environment';
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
+
+      .header-title {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          color: var(--color-text-primary);
+          
+          .material-icons-outlined {
+              font-size: 2rem;
+              color: var(--color-primary);
+          }
+          
+          h1 { margin: 0; font-size: 1.75rem; }
+      }
     }
 
     .upload-btn {
       position: relative;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
     }
     
     .upload-input {
@@ -38,78 +57,214 @@ import { environment } from '../../../../environments/environment';
       cursor: pointer;
     }
 
-    .doc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1.5rem;
+    .table-card {
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .doc-card {
-      background: var(--gradient-card);
-      border: 1px solid var(--color-border);
-      border-radius: 12px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      transition: transform 0.2s;
+    .doc-list {
+        width: 100%;
+        border-collapse: collapse;
+        
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            text-align: left;
+            padding: 1rem 1.5rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--color-border);
+        }
 
-      &:hover {
-        transform: translateY(-2px);
-        border-color: var(--color-primary);
-      }
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
     }
 
-    .doc-icon {
-      font-size: 3rem;
-      color: #ef4444; /* PDF Color */
-      align-self: center;
+    .col-icon { width: 50px; text-align: center; }
+    .col-title { min-width: 300px; }
+    .col-date { width: 150px; color: var(--color-text-secondary); }
+    .col-size { width: 120px; color: var(--color-text-secondary); }
+    .col-actions { width: 250px; }
+
+    .pdf-icon {
+        color: #ef4444;
+        font-size: 1.5rem;
     }
 
-    .doc-info {
-      text-align: center;
-      
-      h3 {
-        font-size: 1rem;
-        margin: 0 0 0.5rem 0;
+    .title-text {
+        font-weight: 500;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-      }
-
-      .meta {
-        font-size: 0.8rem;
-        color: var(--color-text-secondary);
-      }
+        max-width: 400px;
     }
 
-    .doc-actions {
-        margin-top: auto;
+    .action-group {
         display: flex;
-        gap: 0.5rem;
-
-        button {
-            flex: 1;
-        }
+        gap: 0.25rem;
+        align-items: center;
+        justify-content: flex-end;
     }
-    
-    .loading-overlay {
-        position: fixed;
-        top:0; left:0; right:0; bottom:0;
-        background: rgba(0,0,0,0.5);
+
+    .btn--icon {
+        width: 36px;
+        height: 36px;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1000;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+        
+        .material-icons-outlined {
+            font-size: 1.25rem;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+    }
+
+    .btn--danger-ghost {
+        color: var(--color-text-secondary);
+        &:hover {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+        }
+    }
+
+    .empty-row {
+        padding: 4rem 0 !important;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        color: var(--color-text-muted);
+
+        .material-icons-outlined { font-size: 3rem; opacity: 0.5; }
+        p { margin: 0; }
+    }
+
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 4rem;
+        gap: 1.5rem;
+        color: var(--color-text-secondary);
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--color-border);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* PDF Preview Modal */
+    .preview-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+    }
+
+    .preview-container {
+        background: var(--color-bg-secondary);
+        width: 95vw;
+        height: 95vh;
+        max-width: 1400px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--color-border);
+    }
+
+    .preview-header {
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--color-border);
+
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            
+            .material-icons-outlined { color: #ef4444; }
+            h3 { 
+                margin: 0; 
+                font-size: 1.1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 700px;
+            }
+        }
+    }
+
+    .preview-body {
+        flex: 1;
+        background: #525659; /* Standard PDF viewer background */
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    }
+
+    .btn-close {
+        color: var(--color-text-secondary);
+        &:hover { color: var(--color-text-primary); }
     }
   `]
 })
 export class DocumentListComponent implements OnInit {
   private apiService = inject(ApiService);
   private certService = inject(CertificationService);
+  private sanitizer = inject(DomSanitizer);
 
   documents = signal<any[]>([]);
   loading = signal(false);
+
+  // Preview signals
+  showPreview = signal(false);
+  previewUrl = signal<SafeResourceUrl | null>(null);
+  previewTitle = signal('');
 
   apiUrl = environment.apiUrl;
 
@@ -168,7 +323,19 @@ export class DocumentListComponent implements OnInit {
 
   viewDocument(doc: any) {
     const url = `${this.apiUrl}/documents/${doc.id}/file`;
-    window.open(url, '_blank');
+    this.previewUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+    this.previewTitle.set(doc.title);
+    this.showPreview.set(true);
+  }
+
+  closePreview() {
+    this.showPreview.set(false);
+    this.previewUrl.set(null);
+  }
+
+  downloadDocument(doc: any) {
+    const url = this.apiService.downloadDocument(doc.id);
+    window.open(url, '_self');
   }
 
   deleteDocument(id: string) {
